@@ -1,0 +1,13 @@
+paths:
+  /origins:
+    get:
+      summary: Returns a list of coffee origins.
+      responses:
+        '200':
+          description: A list of coffee origins.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Origin'

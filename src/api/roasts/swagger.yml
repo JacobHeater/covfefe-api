@@ -1,0 +1,59 @@
+paths:
+  /roasts:
+    get:
+      summary: Returns a list of coffee roasts.
+      responses:
+        '200':
+          description: A list of coffee roasts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Roast'
+    post:
+      summary: Creates a new coffee roast.
+      responses:
+        '200':
+          description: OK
+  /roasts/{roastId}:
+    get:
+      summary: Returns a single roast by id.
+      parameters:
+        - name: roastId
+          in: path
+          required: true
+          description: The unique identifier of the roast.
+          schema:
+            type : string
+      responses:
+        '200':
+          description: A single coffee roast by id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Roast'
+    put:
+      summary: Updates a coffee roast by id.
+      parameters:
+        - name: roastId
+          in: path
+          required: true
+          description: The unique identifier of the roast.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Deletes a coffee roast by id.
+      parameters:
+        - name: roastId
+          in: path
+          required: true
+          description: The unique identifier of the roast.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
