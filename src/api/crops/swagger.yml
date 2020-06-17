@@ -1,63 +1,63 @@
 paths:
-  /origins:
+  /crops:
     get:
-      summary: Returns a list of coffee origins.
+      summary: Returns a list of coffee crops.
       responses:
         '200':
-          description: A list of coffee origins.
+          description: A list of coffee crops.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Origin'
+                  $ref: '#/components/schemas/Crop'
     post:
-      summary: Creates a coffee origin
+      summary: Creates a coffee crop
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Origin'
+              $ref: '#/components/schemas/Crop'
       responses:
         '200':
           description: OK
-  /origins/{originId}:
+  /crops/{cropId}:
     put:
-      summary: Updates a coffee origin by id.
+      summary: Updates a coffee crop by id.
       parameters:
-        - name: originId
+        - name: cropId
           in: path
           required: true
-          description: The unique identifier of the origin.
+          description: The unique identifier of the crop.
           schema:
             type : string
       responses:
         '200':
           description: OK
     get:
-      summary: Gets a coffee origin by id
+      summary: Gets a coffee crop by id
       parameters:
-        - name: originId
+        - name: cropId
           in: path
           required: true
-          description: The unique identifier of the origin.
+          description: The unique identifier of the crop.
           schema:
             type : string
       responses:
         '200':
-          description: The coffee origin by id.
+          description: The coffee crop by id.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Origin'
+                $ref: '#/components/schemas/Crop'
     delete:
-      summary: Deletes a coffee origin by id
+      summary: Deletes a coffee crop by id
       parameters:
-        - name: originId
+        - name: cropId
           in: path
           required: true
-          description: The unique identifier of the origin.
+          description: The unique identifier of the crop.
           schema:
             type : string
       responses:

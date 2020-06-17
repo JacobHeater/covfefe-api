@@ -1,14 +1,17 @@
-import { IRoute } from "../iroute";
-import express, { Router } from "express";
+import { IRoute, IRouteComponent } from "../iroute";
+import express from "express";
+import { appContext } from '@domain';
 import * as swagger from 'swagger-ui-express';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const swaggerDocument = require('@appcontext/swagger.json');
+import * as path from 'path';
+import * as fs from 'fs-extra';
 
 export const docsRoute: IRoute = {
-  exposeRoute(): [string, Router] {
+  exposeRoute(): IRouteComponent {
     const router = express.Router();
+    const swaggerPath = path.join(appContext.baseDir, 'swagger.json');
+    const swaggerDocument = JSON.parse(fs.readFileSync(swaggerPath).toString());
 
-    router.use('/', swagger.serve, swagger.setup(swaggerDocument));
+    router.use('/', swagger.serve, swagger.setup({ swaggerDocument }));
 
     return ['/docs', router];
   }
