@@ -1,19 +1,19 @@
-import express, { Express } from 'express';
+import express from 'express';
 import { roastsRoute } from './roasts';
 import { originsRoute } from './origins';
 import { docsRoute } from './docs';
+import { IRouteComponent } from './iroute';
 
-const apiRouter = express.Router();
-let isInitialized = false;
-
-export function initializeApi(app: Express): void {
-  if (isInitialized) return;
-
-  const routes = [
-    roastsRoute.exposeRoute(),
-    originsRoute.exposeRoute(),
-    docsRoute.exposeRoute()
-  ];
+/**
+ * Initializes the /api Router and compiles
+ * all of the routes into this route as
+ * sub-routes.
+ */
+export function initializeApiRouter(): IRouteComponent {
+  const apiRouter = express.Router();
+  const routes = [roastsRoute, originsRoute, docsRoute].map((r) =>
+    r.exposeRoute(),
+  );
 
   for (const route of routes) {
     const [path, router] = route;
@@ -21,6 +21,5 @@ export function initializeApi(app: Express): void {
     apiRouter.use(path, router);
   }
 
-  app.use('/api', apiRouter);
-  isInitialized = true;
+  return ['/api', apiRouter];
 }

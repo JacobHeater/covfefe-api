@@ -17,10 +17,16 @@
             ],
             "@common/*": [
                 "../covfefe-common/src/*"
+            ],
+            "@domain": [
+                "src/domain"
+            ],
+            "@app/*": [
+                "src/*"
             ]
         }
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
     ]
 }

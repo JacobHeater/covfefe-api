@@ -1,14 +1,47 @@
 import express from 'express';
 import { argv } from 'yargs';
+import { Server } from 'http';
 import 'module-alias/register';
 
-import { initializeApi } from './api';
+import { initializeApiRouter } from './api';
 
 const app = express();
-const port = process.env.PORT || argv.port || 8080;
+const port = Number(process.env.PORT || argv.port || 8080);
+const [apiPath, apiRouter] = initializeApiRouter();
 
-initializeApi(app);
+if (require.main === module) {
+  (async () => await startServerAsync(port))();
+}
 
-app.set('x-powered-by', false);
-app.get('/', (_, res) => res.send('Covfefe API. See /api/docs for more information'));
-app.listen(port, () => console.log(`Covfefe API is listening on port ${port}`));
+export function startServerAsync(port: number): Promise<Server> {
+  return new Promise((resolve, reject) => {
+    try {
+      app.use(apiPath, apiRouter);
+      app.set('x-powered-by', false);
+      app.get('/', (_, res) => res.redirect('/api/docs'));
+      const server = app.listen(port, () => {
+        console.log(`Covfefe API is listening on port ${port}`);
+        resolve(server);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+export function stopServerAsync(server: Server): Promise<void> {
+  if (server) {
+    return new Promise((resolve, reject) => {
+      try {
+        server.close(() => {
+          console.log(`Covfefe API has stopped`);
+          resolve();
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  return Promise.resolve();
+}
