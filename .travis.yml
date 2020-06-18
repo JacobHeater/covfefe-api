@@ -9,7 +9,7 @@ before_install:
   - git clone https://github.com/JacobHeater/covfefe-common.git
   - cd ./covfefe-common
   - npm install
-  - cd ..
+  - cd ../covfefe-api
 install:
   - npm install
 script:
