@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - 10
+  - 12
+  - 14
+  - lts/*
+before_install:
+  - cd ..
+  - git clone https://github.com/JacobHeater/covfefe-common.git
+  - cd ./covfefe-common
+  - npm install
+  - cd ..
+install:
+  - npm install
+script:
+  - npm run rebuild
+  - npm run test
+after_script:
+  - npm run clean
