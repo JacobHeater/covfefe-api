@@ -23,11 +23,13 @@ jobs:
         node-version: [10.x, 12.x, 14.x]
 
     steps:
-    - name: Checkout tools repo
+    - name: Checkout common repo
       uses: actions/checkout@master
       with:
         repository: jacobheater/covfefe-common
-    - run: npm ci
+    - run: cd ./covfefe-common
+    - run: npm i
+    - run: ../
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
