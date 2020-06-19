@@ -4,6 +4,8 @@ node_js:
   - 12
   - 14
   - lts/*
+services:
+  - mongodb
 before_install:
   - cd ..
   - git clone https://github.com/JacobHeater/covfefe-common.git

@@ -2,6 +2,7 @@ import express from 'express';
 import { roastsRoute } from './roasts';
 import { originsRoute } from './origins';
 import { docsRoute } from './docs';
+import { cropsRoute } from './crops';
 import { IRouteComponent } from './iroute';
 
 /**
@@ -11,7 +12,7 @@ import { IRouteComponent } from './iroute';
  */
 export function initializeApiRouter(): IRouteComponent {
   const apiRouter = express.Router();
-  const routes = [roastsRoute, originsRoute, docsRoute].map((r) =>
+  const routes = [roastsRoute, originsRoute, docsRoute, cropsRoute].map((r) =>
     r.exposeRoute(),
   );
 

@@ -1,12 +1,5 @@
-import { startServerAsync, stopServerAsync } from '..';
-import { Server } from 'http';
 import * as request from 'request-promise-native';
-import { serverPort, serverResource } from './helpers';
-
-let server: Server;
-
-beforeAll(async () => server = await startServerAsync(serverPort));
-afterAll((async () => await stopServerAsync(server)));
+import { serverResource } from './helpers';
 
 test('It should respond to http get / with a redirect to /api/docs', async () => {
   const response = await request.get(serverResource());

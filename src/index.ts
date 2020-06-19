@@ -1,6 +1,7 @@
 import express from 'express';
 import { argv } from 'yargs';
 import { Server } from 'http';
+import * as bodyParser from 'body-parser';
 import 'module-alias/register';
 
 import { initializeApiRouter } from './api';
@@ -16,6 +17,8 @@ if (require.main === module) {
 export function startServerAsync(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
     try {
+      app.use(express.json());
+      app.use(bodyParser.json());
       app.use(apiPath, apiRouter);
       app.set('x-powered-by', false);
       app.get('/', (_, res) => res.redirect('/api/docs'));

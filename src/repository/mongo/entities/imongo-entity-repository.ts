@@ -5,8 +5,8 @@ export interface IMongoEntityRepository<TModel extends Entity> {
   findOneAsync(filter: TModel | { [key: string]: unknown }): Promise<TModel>;
   findAllAsync(): Promise<TModel[]>;
   findOneByIdAsync(id: string): Promise<TModel>;
-  insertOneAsync(entity: TModel): Promise<boolean>;
-  insertManyAsync(entities: TModel[]): Promise<boolean>;
+  insertOneAsync(entity: TModel): Promise<string>;
+  insertManyAsync(entities: TModel[]): Promise<string[]>;
   updateOneAsync(
     id: string,
     entity: TModel | { [key: string]: unknown },
