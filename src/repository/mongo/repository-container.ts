@@ -4,8 +4,9 @@ import { MongoConnection } from '@app/database/mongo/mongo-connection';
 import { Environment } from '@app/env';
 import { EntityRepositoryBase } from './entities/entity-repository-base';
 import { Db } from 'mongodb';
+import { IDisposable } from '@common/idisposable';
 
-export class RepositoryContainer<TModel extends Entity> {
+export class RepositoryContainer<TModel extends Entity> implements IDisposable {
   constructor(repositoryFactory: (new (database: Db) => EntityRepositoryBase<TModel>)) {
     this._repositoryFactory = repositoryFactory;
     this._mongo = new MongoConnection(Environment.mongoConnectionString);
@@ -29,5 +30,9 @@ export class RepositoryContainer<TModel extends Entity> {
 
     await this._mongo.disconnect();
     this._repoInstance = null;
+  }
+
+  async dispose(): Promise<void> {
+    await this.destroy();
   }
 }

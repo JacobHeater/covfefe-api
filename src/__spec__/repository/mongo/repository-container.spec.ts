@@ -1,10 +1,18 @@
 import { RepositoryContainer } from "@app/repository/mongo/repository-container";
-import { DummyRepository } from "./dummy/dummy-repository";
-import { DummyModel } from "./dummy/models/dummy-model";
+import { DummyRepository } from "../../helpers/dummy/dummy-repository";
+import { DummyModel } from "../../helpers/dummy/models/dummy-model";
+import { IMongoEntityRepository } from "@app/repository/mongo/entities/imongo-entity-repository";
+
+let container: RepositoryContainer<DummyModel>;
+let repo: IMongoEntityRepository<DummyModel>;
+
+beforeAll(async () => {
+  container = new RepositoryContainer(DummyRepository);
+  repo = await container.create();
+});
+afterAll(async () => await container.destroy());
 
 test('It should create a connected instance of the repository', async () => {
-  const container = new RepositoryContainer(DummyRepository);
-  const repo = await container.create();
   const model = new DummyModel();
   model.data = 'This is a test';
 
@@ -17,6 +25,4 @@ test('It should create a connected instance of the repository', async () => {
   expect(one).toBeTruthy();
   expect(one.id).toBe(model.id);
   expect(one.data).toBe(model.data);
-
-  await container.destroy();
 });

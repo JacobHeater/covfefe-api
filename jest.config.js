@@ -4,13 +4,13 @@ module.exports = {
   testTimeout: 60000,
   testMatch: ['**/?(*.)+(spec|test).ts?(x)'],
   setupFiles: [
-    '<rootDir>/jest/vars.js'
+    '<rootDir>/src/__spec__/jest/vars.js'
   ],
   moduleNameMapper: {
     '^@common/(.*)$': '<rootDir>/../covfefe-common/src/$1',
     '^@domain': '<rootDir>/src/domain/',
     '^@app/(.*)$': '<rootDir>/src/$1'
   },
-  globalSetup: '<rootDir>/jest/setup.js',
-  globalTeardown: '<rootDir>/jest/teardown.js'
+  globalSetup: '<rootDir>/src/__spec__/jest/setup.ts',
+  globalTeardown: '<rootDir>/src/__spec__/jest/teardown.ts'
 };

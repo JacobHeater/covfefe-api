@@ -1,42 +1,43 @@
 import { MongoClient, MongoClientOptions, Db } from 'mongodb';
 import { Environment } from '@app/env';
+import { IDisposable } from '@common/idisposable';
 
-export class MongoConnection {
+export class MongoConnection implements IDisposable {
   constructor(
     url: string,
     databaseName?: string,
     options?: MongoClientOptions,
   ) {
-    this._url = url;
-    this._client = new MongoClient(this._url, options || {});
-    this._databaseName = databaseName || Environment.mongoDatabaseName || 'covfefe';
+    this.url = url;
+    this.client = new MongoClient(this.url, options || {});
+    this.databaseName = databaseName || Environment.mongoDatabaseName || 'covfefe';
   }
 
   get instance(): Db {
-    if (!this._isConnected)
+    if (!this.isConnected)
       throw new Error(
         `You must call .connect() before trying to get the instance of the Db.`,
       );
 
-    return this._client.db(this._databaseName);
+    return this.client.db(this.databaseName);
   }
 
-  private _isConnected = false;
-  private _url: string;
-  private _client: MongoClient;
-  private _databaseName: string;
+  protected isConnected = false;
+  protected url: string;
+  protected client: MongoClient;
+  protected databaseName: string;
 
   async connect(): Promise<void> {
-    if (this._isConnected) return;
-
-    await this._client.connect();
-    this._isConnected = true;
+    this.client = await this.client.connect();
+    this.isConnected = true;
   }
 
   async disconnect(): Promise<void> {
-    if (!this._isConnected) return;
+    await this.client.close();
+    this.isConnected = false;
+  }
 
-    await this._client.close();
-    this._isConnected = false;
+  async dispose(): Promise<void> {
+    await this.disconnect();
   }
 }
