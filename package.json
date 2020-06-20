@@ -4,7 +4,7 @@
   "description": "The API for the covfefe app.",
   "main": "bin/covfefe-api/src/index.js",
   "scripts": {
-    "test": "npm run rebuild && npx jest --detectOpenHandles",
+    "test": "npm run rebuild && npx jest --runInBand --detectOpenHandles",
     "clean": "npx rimraf bin",
     "build": "npx tsc && node ./scripts/build/post-build.js",
     "rebuild": "npm run clean && npm run build",

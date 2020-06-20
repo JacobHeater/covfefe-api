@@ -6,4 +6,8 @@ export class Environment {
   static get mongoDatabaseName(): string {
     return process.env.MONGO_DEFAULT_DATABASE;
   }
+
+  static get isDevelopment(): boolean {
+    return process.env.NODE_ENV === 'development';
+  }
 }

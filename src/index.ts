@@ -1,10 +1,10 @@
 import express from 'express';
 import { argv } from 'yargs';
 import { Server } from 'http';
-import * as bodyParser from 'body-parser';
 import 'module-alias/register';
-
 import { initializeApiRouter } from './api';
+import { covfefeErrorHandler } from './api/middleware/response';
+import bodyParser from 'body-parser';
 
 const app = express();
 const port = Number(process.env.PORT || argv.port || 8080);
@@ -17,11 +17,18 @@ if (require.main === module) {
 export function startServerAsync(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
     try {
-      app.use(express.json());
+      // Third-party middleware
       app.use(bodyParser.json());
-      app.use(apiPath, apiRouter);
+      app.use(express.json());
       app.set('x-powered-by', false);
+      
+      // Http handlers
       app.get('/', (_, res) => res.redirect('/api/docs'));
+      app.use(apiPath, apiRouter);
+      
+      // Covfefe middleware
+      app.use(covfefeErrorHandler);
+      
       const server = app.listen(port, () => {
         console.log(`Covfefe API is listening on port ${port}`);
         resolve(server);

@@ -1,6 +1,6 @@
-import { DummyRepository } from '@app/__spec__/repository/mongo/dummy/dummy-repository';
+import { DummyRepository } from '@app/__spec__/helpers/dummy/dummy-repository';
 import { InMemoryMongoHelper } from '@app/__spec__/helpers/mongo';
-import { DummyModel } from '../dummy/models/dummy-model';
+import { DummyModel } from '../../../helpers/dummy/models/dummy-model';
 
 const dbHelper = new InMemoryMongoHelper();
 let dummyRepo: DummyRepository;
@@ -10,6 +10,7 @@ beforeAll(async () => {
   await dbHelper.start();
   dummyRepo = new DummyRepository(dbHelper.db);
 });
+
 afterAll(async () => {
   await dbHelper.cleanup();
   await dbHelper.stop();
