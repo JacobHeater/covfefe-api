@@ -2,6 +2,7 @@ import { Entity } from '@common/models/entities/entity';
 import { IMongoEntityRepository } from './imongo-entity-repository';
 import { Db, Collection, FilterQuery } from 'mongodb';
 import shortid from 'shortid';
+import { IEntityRepositoryReferencePopulator } from './references/ientity-repository-reference-populator';
 
 const noMongoObjectId = {
   projection: {
@@ -20,6 +21,7 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
   }
 
   protected database: Db;
+  protected abstract references: IEntityRepositoryReferencePopulator<TModel>[];
   protected abstract readonly collectionName: string;
   protected abstract readonly factory: new () => TModel;
   protected get collection(): Collection {
@@ -33,7 +35,13 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       .find(filter, { ...noMongoObjectId })
       .toArray();
 
-    return any.map(this.mapMongoDocumentToEntity.bind(this));
+    const entities = any.map(doc => this.mapMongoDocumentToEntity(doc));
+
+    for (const entity of entities) {
+      await this.processReferencesAsync(entity);
+    }
+
+    return entities;
   }
 
   async findOneAsync(
@@ -47,7 +55,11 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       return one;
     }
 
-    return this.mapMongoDocumentToEntity(one);
+    const entity = this.mapMongoDocumentToEntity(one);
+
+    await this.processReferencesAsync(entity);
+
+    return entity;
   }
 
   async findAllAsync(): Promise<TModel[]> {
@@ -55,14 +67,24 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       .find({}, { ...noMongoObjectId })
       .toArray();
 
-    return all.map(this.mapMongoDocumentToEntity.bind(this));
+    const entities = all.map(doc => this.mapMongoDocumentToEntity(doc));
+
+    for (const entity of entities) {
+      await this.processReferencesAsync(entity);
+    }
+
+    return entities;
   }
 
   async findOneByIdAsync(id: string): Promise<TModel> {
     const found = await this.collection.findOne({ id }, { ...noMongoObjectId });
 
     if (found) {
-      return this.mapMongoDocumentToEntity(found);
+      const entity = this.mapMongoDocumentToEntity(found);
+
+      await this.processReferencesAsync(entity);
+
+      return entity;
     }
 
     return found;
@@ -148,5 +170,11 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       throw new Error(`Argument 'doc' is must be an instance of an object.`);
 
     return Object.assign(new this.factory(), doc);
+  }
+
+  private async processReferencesAsync(entity: TModel): Promise<void[]> {
+    if (Array.isArray(this.references) && this.references.length > 0) {
+      return Promise.all(this.references.map(ref => ref.populateReferenceAsync(entity)));
+    }
   }
 }
