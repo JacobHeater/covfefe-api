@@ -1,0 +1,53 @@
+import { RepositoryFactory, ApiHttpHandler, ApiResponse } from './types';
+import { Request, Response, NextFunction } from 'express';
+import { HttpStatusError } from '@app/errors/http/http-status-error';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status-codes';
+import { RepositoryContainer } from '@app/repository/mongo/repository-container';
+import { Entity } from '@common/models/entities/entity';
+import { using } from '@common/using';
+
+export function createPostHandler<TEntity extends Entity>(
+  repoFactory: RepositoryFactory<TEntity>,
+  bodyValidator: (body: TEntity | unknown) => boolean,
+): ApiHttpHandler {
+  return async function postEntity(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): ApiResponse {
+    if (!req.body) {
+      return next(
+        new HttpStatusError(`No model was provided for creation`, BAD_REQUEST),
+      );
+    }
+
+    if (!bodyValidator(req.body)) {
+      return next(new HttpStatusError(`The model is invalid.`, BAD_REQUEST));
+    }
+
+    const [inserted, error] = await using(
+      new RepositoryContainer(repoFactory),
+      async (container) => {
+        const cropRepo = await container.create();
+        const id = await cropRepo.insertOneAsync(req.body);
+
+        if (id) {
+          const inserted = await cropRepo.findOneByIdAsync(id);
+          return inserted;
+        }
+      },
+    );
+
+    if (!inserted) {
+      return next(
+        new HttpStatusError(
+          `An error occurred while creating the resource. Please try again.`,
+          INTERNAL_SERVER_ERROR,
+          error,
+        ),
+      );
+    }
+
+    return res.send(inserted);
+  };
+}

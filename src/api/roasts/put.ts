@@ -1,6 +1,4 @@
-import { OK } from 'http-status-codes';
-import { Response, Request } from 'express';
+import { createPutHandler } from "../base/put";
+import { RoastRepository } from "@app/repository/mongo/roasts/roast-repository";
 
-export function putRoast(req: Request, res: Response): void {
-  res.send(OK);
-}
+export const putRoast = createPutHandler(RoastRepository);

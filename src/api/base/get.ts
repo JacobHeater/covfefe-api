@@ -3,17 +3,15 @@ import { Request, Response, NextFunction } from 'express';
 import { HttpStatusError } from '@app/errors/http/http-status-error';
 import { RepositoryContainer } from '@app/repository/mongo/repository-container';
 import { using } from '@common/using';
-import { Db } from 'mongodb';
-import { EntityRepositoryBase } from '@app/repository/mongo/entities/entity-repository-base';
 import {
   INTERNAL_SERVER_ERROR,
   BAD_REQUEST,
   NOT_FOUND,
 } from 'http-status-codes';
-import { ApiHttpHandler, ApiResponse } from './types';
+import { ApiHttpHandler, ApiResponse, RepositoryFactory } from './types';
 
 export function createGetManyHandler<TEntity extends Entity>(
-  repoFactory: new (db: Db) => EntityRepositoryBase<TEntity>,
+  repoFactory: RepositoryFactory<TEntity>,
 ): ApiHttpHandler {
   return async function getManyOfEntity(
     _: Request,
@@ -44,7 +42,7 @@ export function createGetManyHandler<TEntity extends Entity>(
 }
 
 export function createGetOneHandler<TEntity extends Entity>(
-  repoFactory: new (db: Db) => EntityRepositoryBase<TEntity>,
+  repoFactory: RepositoryFactory<TEntity>,
 ): ApiHttpHandler {
   return async function getOne(
     req: Request,

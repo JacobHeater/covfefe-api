@@ -6,16 +6,6 @@ import { Crop } from "@common/models/entities/crop/crop";
 import shortid from "shortid";
 
 export class RoastsApiTestSuite extends ApiTestSuite<Roast> {
-  constructor() {
-    // Skipping for now until I
-    // have the endpoints implemented
-    super([
-      SkipTestsInSuite.Delete,
-      SkipTestsInSuite.Post,
-      SkipTestsInSuite.Put
-    ]);
-  }
-
   protected factory(): Roast {
     const roast = new Roast();
     roast.crop = new Crop();

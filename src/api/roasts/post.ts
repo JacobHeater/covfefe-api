@@ -1,6 +1,5 @@
-import { OK } from 'http-status-codes';
-import { Response, Request } from 'express';
+import { createPostHandler } from "../base/post";
+import { RoastRepository } from "@app/repository/mongo/roasts/roast-repository";
+import { Roast } from "@common/models/entities/roast/roast";
 
-export function postRoast(req: Request, res: Response): void {
-  res.send(OK);
-}
+export const postRoast = createPostHandler(RoastRepository, Roast.isValid);

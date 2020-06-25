@@ -13,23 +13,18 @@ export enum SkipTestsInSuite {
 }
 
 export abstract class ApiTestSuite<TEntity extends Entity> {
-  constructor(skip: SkipTestsInSuite[] = []) {
-    this._skipped = skip;
-  }
-
   protected abstract factory(): TEntity;
   protected abstract routeName: string;
   protected abstract modelName: string;
   protected abstract assertPutEquals(model: TEntity, response: TEntity): void;
   protected abstract updateForPut(model: TEntity): TEntity;
-
-  private _skipped: SkipTestsInSuite[] = [];
+  protected skipped: SkipTestsInSuite[] = [];
 
   public init(): void {
-    !this._skipped.includes(SkipTestsInSuite.Get) && this.initGet();
-    !this._skipped.includes(SkipTestsInSuite.Post) && this.initPost();
-    !this._skipped.includes(SkipTestsInSuite.Put) && this.initPut();
-    !this._skipped.includes(SkipTestsInSuite.Delete) && this.initDelete();
+    !this.skipped.includes(SkipTestsInSuite.Get) && this.initGet();
+    !this.skipped.includes(SkipTestsInSuite.Post) && this.initPost();
+    !this.skipped.includes(SkipTestsInSuite.Put) && this.initPut();
+    !this.skipped.includes(SkipTestsInSuite.Delete) && this.initDelete();
   }
 
   private initGet(): void {
