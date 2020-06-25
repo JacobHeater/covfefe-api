@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
+import { createDeleteHandler } from "../base/delete";
+import { RoastRepository } from "@app/repository/mongo/roasts/roast-repository";
 
-export function deleteRoast(req: Request, res: Response): void {
-  res.send(200);
-}
+export const deleteRoast = createDeleteHandler(RoastRepository);

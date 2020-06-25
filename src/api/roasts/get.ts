@@ -1,10 +1,5 @@
-import { Response, Request } from 'express';
-import { Roast } from '@common/models/entities/roast/roast';
+import { createGetManyHandler, createGetOneHandler } from "../base/get";
+import { RoastRepository } from "@app/repository/mongo/roasts/roast-repository";
 
-export function getRoasts(req: Request, res: Response): void {
-  res.send([new Roast()]);
-}
-
-export function getRoast(req: Request, res: Response): void {
-  res.send(new Roast());
-}
+export const getRoasts = createGetManyHandler(RoastRepository);
+export const getRoast = createGetOneHandler(RoastRepository);
