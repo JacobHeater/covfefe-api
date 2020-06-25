@@ -5,18 +5,31 @@ import shortid from 'shortid';
 import { serverResource } from '../helpers';
 import * as request from 'request-promise-native';
 
+export enum SkipTestsInSuite {
+  Get,
+  Post,
+  Put,
+  Delete
+}
+
 export abstract class ApiTestSuite<TEntity extends Entity> {
+  constructor(skip: SkipTestsInSuite[] = []) {
+    this._skipped = skip;
+  }
+
   protected abstract factory(): TEntity;
   protected abstract routeName: string;
   protected abstract modelName: string;
   protected abstract assertPutEquals(model: TEntity, response: TEntity): void;
   protected abstract updateForPut(model: TEntity): TEntity;
 
+  private _skipped: SkipTestsInSuite[] = [];
+
   public init(): void {
-    this.initGet();
-    this.initPost();
-    this.initPut();
-    this.initDelete();
+    !this._skipped.includes(SkipTestsInSuite.Get) && this.initGet();
+    !this._skipped.includes(SkipTestsInSuite.Post) && this.initPost();
+    !this._skipped.includes(SkipTestsInSuite.Put) && this.initPut();
+    !this._skipped.includes(SkipTestsInSuite.Delete) && this.initDelete();
   }
 
   private initGet(): void {

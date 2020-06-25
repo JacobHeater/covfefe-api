@@ -3,7 +3,7 @@ import { ApiTestSuite } from "../../api-test-suite";
 import { Origin } from "@common/models/entities/origin/origin";
 import { random } from 'faker';
 
-export class OriginApiTestSuite extends ApiTestSuite<Origin> {
+export class OriginsApiTestSuite extends ApiTestSuite<Origin> {
   protected modelName = Origin.name;
   protected factory(): Origin {
     const origin = new Origin();

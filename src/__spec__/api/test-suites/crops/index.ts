@@ -4,7 +4,7 @@ import { Origin } from "@common/models/entities/origin/origin";
 import shortid from "shortid";
 import { random } from 'faker';
 
-export class CropApiTestSuite extends ApiTestSuite<Crop> {
+export class CropsApiTestSuite extends ApiTestSuite<Crop> {
   protected modelName = Crop.name;
   protected factory(): Crop {
     const crop = new Crop();
