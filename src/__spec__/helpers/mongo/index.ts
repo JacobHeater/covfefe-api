@@ -1,5 +1,5 @@
-import { MongoClient, Db } from "mongodb";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { MongoClient, Db } from 'mongodb';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 export class InMemoryMongoHelper {
   constructor() {
@@ -17,10 +17,10 @@ export class InMemoryMongoHelper {
    */
   async start(): Promise<void> {
     const url = await this.server.getConnectionString();
-    this.connection = await MongoClient.connect(
-      url,
-      { useNewUrlParser: true }
-    );
+    this.connection = await MongoClient.connect(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     this.db = this.connection.db(await this.server.getDbName());
   }
 
@@ -40,7 +40,7 @@ export class InMemoryMongoHelper {
     await Promise.all(
       collections
         .map(({ name }) => name)
-        .map(collection => this.db.collection(collection).drop())
+        .map((collection) => this.db.collection(collection).drop()),
     );
   }
 }

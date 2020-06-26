@@ -3,13 +3,15 @@ import { EntityRepositoryBase } from '../entities/entity-repository-base';
 import { IEntityRepositoryReferencePopulator } from '../entities/references/ientity-repository-reference-populator';
 import { Db } from 'mongodb';
 import { CropOriginReferencePopulator } from './crop-origin-reference-populator';
+import { EntityUserReferencePopulator } from '../users/entity-user-reference-populator';
 
 export class CropRepository extends EntityRepositoryBase<Crop> {
   constructor(db: Db) {
     super(db);
 
     this.references = [
-      new CropOriginReferencePopulator(db)
+      new CropOriginReferencePopulator(db),
+      new EntityUserReferencePopulator<Crop>(db)
     ];
   }
   protected references: IEntityRepositoryReferencePopulator<Crop>[];

@@ -1,4 +1,4 @@
-import { createPutHandler } from "../base/put";
-import { RoastRepository } from "@app/repository/mongo/roasts/roast-repository";
+import { createPutHandler } from "../entity-base-routes/put";
+import { RoastRepository } from "@app/repository/mongo/roast/roast-repository";
 
 export const putRoast = createPutHandler(RoastRepository);

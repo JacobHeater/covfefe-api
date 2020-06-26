@@ -1,7 +1,7 @@
 import { IMongoEntityRepository } from './entities/imongo-entity-repository';
 import { Entity } from '@common/models/entities/entity';
 import { MongoConnection } from '@app/database/mongo/mongo-connection';
-import { Environment } from '@app/env';
+import { ApiEnvironment } from '@app/env';
 import { EntityRepositoryBase } from './entities/entity-repository-base';
 import { Db } from 'mongodb';
 import { IDisposable } from '@common/idisposable';
@@ -9,7 +9,7 @@ import { IDisposable } from '@common/idisposable';
 export class RepositoryContainer<TModel extends Entity> implements IDisposable {
   constructor(repositoryFactory: (new (database: Db) => EntityRepositoryBase<TModel>)) {
     this._repositoryFactory = repositoryFactory;
-    this._mongo = new MongoConnection(Environment.mongoConnectionString);
+    this._mongo = new MongoConnection(ApiEnvironment.mongoConnectionString);
   }
 
   private _repositoryFactory: new (database: Db) => EntityRepositoryBase<TModel>;

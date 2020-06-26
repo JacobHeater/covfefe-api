@@ -1,4 +1,4 @@
-import { createPostHandler } from "../base/post";
+import { createPostHandler } from "../entity-base-routes/post";
 import { OriginRepository } from "@app/repository/mongo/origin/origin-repository";
 import { Origin } from "@common/models/entities/origin/origin";
 

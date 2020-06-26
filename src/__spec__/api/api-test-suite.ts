@@ -9,7 +9,7 @@ export enum SkipTestsInSuite {
   Get,
   Post,
   Put,
-  Delete
+  Delete,
 }
 
 export abstract class ApiTestSuite<TEntity extends Entity> {
@@ -25,6 +25,19 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
     !this.skipped.includes(SkipTestsInSuite.Post) && this.initPost();
     !this.skipped.includes(SkipTestsInSuite.Put) && this.initPut();
     !this.skipped.includes(SkipTestsInSuite.Delete) && this.initDelete();
+    this.registerAdditionalTests();
+  }
+
+  protected registerAdditionalTests(): void {
+    // virtual method for tests to register additional assertions
+  }
+
+  protected route(id?: string): string {
+    if (id) {
+      return serverResource(`api/${this.routeName}/${id}`);
+    }
+
+    return serverResource(`api/${this.routeName}`);
   }
 
   private initGet(): void {
@@ -172,13 +185,5 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
 
       await expect(_delete).rejects.toThrow(/404/);
     });
-  }
-
-  private route(id?: string): string {
-    if (id) {
-      return serverResource(`api/${this.routeName}/${id}`);
-    }
-
-    return serverResource(`api/${this.routeName}`);
   }
 }
