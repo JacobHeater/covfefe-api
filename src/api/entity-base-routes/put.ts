@@ -19,8 +19,8 @@ export function createPutHandler<TEntity extends Entity>(
     }
   
     const [updateResult, error] = await using(new RepositoryContainer(repoFactory), async container => {
-      const cropRepo = await container.create();
-      const updateResult = await cropRepo.updateOneAsync(req.params.id, req.body);
+      const repo = await container.create();
+      const updateResult = await repo.updateOneAsync(req.params.id, req.body);
   
       return updateResult;
     });

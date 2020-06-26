@@ -1,4 +1,4 @@
-export class Environment {
+export class ApiEnvironment {
   static get mongoConnectionString(): string {
     return process.env.MONGO_CONNECTION_STRING;
   }

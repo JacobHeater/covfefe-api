@@ -10,8 +10,8 @@ before_install:
   - cd ..
   - git clone https://github.com/JacobHeater/covfefe-common.git
   - cd ./covfefe-common
-  - npm install
   - node ./scripts/travis/git/checkout-covfefe-common.js &
+  - npm install
   - cd ../covfefe-api
 install:
   - npm install

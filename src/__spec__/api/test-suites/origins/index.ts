@@ -2,12 +2,16 @@
 import { ApiTestSuite } from "../../api-test-suite";
 import { Origin } from "@common/models/entities/origin/origin";
 import { random } from 'faker';
+import { User } from "@common/models/entities/user/user";
+import shortid from "shortid";
 
 export class OriginsApiTestSuite extends ApiTestSuite<Origin> {
   protected modelName = Origin.name;
   protected factory(): Origin {
     const origin = new Origin();
     
+    origin.user = new User();
+    origin.user.id = shortid.generate();
     origin.altitude = random.number({
       min: 2000,
       max: 4000

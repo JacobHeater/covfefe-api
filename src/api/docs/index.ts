@@ -1,4 +1,4 @@
-import { IRoute, IRouteComponent } from "../iroute";
+import { IRoute, IRouteComponent } from "../types";
 import express from "express";
 import { appContext } from '@domain';
 import * as swagger from 'swagger-ui-express';

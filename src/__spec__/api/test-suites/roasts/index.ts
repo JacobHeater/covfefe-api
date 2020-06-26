@@ -1,13 +1,16 @@
 /* eslint-disable jest/no-standalone-expect */
 import { Roast } from "@common/models/entities/roast/roast";
-import { ApiTestSuite, SkipTestsInSuite } from "../../api-test-suite";
+import { ApiTestSuite } from "../../api-test-suite";
 import { random } from 'faker';
 import { Crop } from "@common/models/entities/crop/crop";
 import shortid from "shortid";
+import { User } from "@common/models/entities/user/user";
 
 export class RoastsApiTestSuite extends ApiTestSuite<Roast> {
   protected factory(): Roast {
     const roast = new Roast();
+    roast.user = new User();
+    roast.user.id = shortid.generate();
     roast.crop = new Crop();
     roast.crop.id = shortid.generate();
     roast.cuppingNotes = [

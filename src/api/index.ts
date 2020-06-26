@@ -3,7 +3,8 @@ import { roastsRoute } from './roasts';
 import { originsRoute } from './origins';
 import { docsRoute } from './docs';
 import { cropsRoute } from './crops';
-import { IRouteComponent } from './iroute';
+import { IRouteComponent } from './types';
+import { usersRoute } from './users';
 
 /**
  * Initializes the /api Router and compiles
@@ -12,9 +13,13 @@ import { IRouteComponent } from './iroute';
  */
 export function initializeApiRouter(): IRouteComponent {
   const apiRouter = express.Router();
-  const routes = [roastsRoute, originsRoute, docsRoute, cropsRoute].map((r) =>
-    r.exposeRoute(),
-  );
+  const routes = [
+    roastsRoute,
+    originsRoute,
+    docsRoute,
+    cropsRoute,
+    usersRoute,
+  ].map((r) => r.exposeRoute());
 
   for (const route of routes) {
     const [path, router] = route;

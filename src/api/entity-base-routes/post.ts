@@ -28,11 +28,11 @@ export function createPostHandler<TEntity extends Entity>(
     const [inserted, error] = await using(
       new RepositoryContainer(repoFactory),
       async (container) => {
-        const cropRepo = await container.create();
-        const id = await cropRepo.insertOneAsync(req.body);
+        const repo = await container.create();
+        const id = await repo.insertOneAsync(req.body);
 
         if (id) {
-          const inserted = await cropRepo.findOneByIdAsync(id);
+          const inserted = await repo.findOneByIdAsync(id);
           return inserted;
         }
       },

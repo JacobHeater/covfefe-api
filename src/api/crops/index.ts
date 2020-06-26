@@ -1,4 +1,4 @@
-import { IRoute, IRouteComponent } from "../iroute";
+import { IRoute, IRouteComponent } from "../types";
 import express from "express";
 import { getCrops, getCrop } from "./get";
 import { putCrop } from "./put";

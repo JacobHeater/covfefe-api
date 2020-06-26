@@ -5,6 +5,8 @@ import 'module-alias/register';
 import { initializeApiRouter } from './api';
 import { covfefeErrorHandler } from './api/middleware/response';
 import bodyParser from 'body-parser';
+import morgan from 'morgan';
+import { winstonStream } from '@common/logging/winston';
 
 const app = express();
 const port = Number(process.env.PORT || argv.port || 8080);
@@ -21,6 +23,7 @@ export function startServerAsync(port: number): Promise<Server> {
       app.use(bodyParser.json());
       app.use(express.json());
       app.set('x-powered-by', false);
+      app.use(morgan('combined', { stream: winstonStream }));
       
       // Http handlers
       app.get('/', (_, res) => res.redirect('/api/docs'));

@@ -1,5 +1,5 @@
 import { MongoClient, MongoClientOptions, Db } from 'mongodb';
-import { Environment } from '@app/env';
+import { ApiEnvironment } from '@app/env';
 import { IDisposable } from '@common/idisposable';
 
 export class MongoConnection implements IDisposable {
@@ -9,8 +9,11 @@ export class MongoConnection implements IDisposable {
     options?: MongoClientOptions,
   ) {
     this.url = url;
-    this.client = new MongoClient(this.url, options || {});
-    this.databaseName = databaseName || Environment.mongoDatabaseName || 'covfefe';
+    this.databaseName = databaseName || ApiEnvironment.mongoDatabaseName || 'covfefe';
+    options = Object.assign<MongoClientOptions, MongoClientOptions>(options || {}, {
+      useUnifiedTopology: true
+    });
+    this.client = new MongoClient(this.url, options);
   }
 
   get instance(): Db {

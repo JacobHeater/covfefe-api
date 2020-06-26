@@ -3,13 +3,15 @@ import { IEntityRepositoryReferencePopulator } from '../entities/references/ient
 import { Db } from 'mongodb';
 import { Roast } from '@common/models/entities/roast/roast';
 import { RoastCropReferencePopulator } from './roast-crop-reference-populator';
+import { EntityUserReferencePopulator } from '../users/entity-user-reference-populator';
 
 export class RoastRepository extends EntityRepositoryBase<Roast> {
   constructor(db: Db) {
     super(db);
 
     this.references = [
-      new RoastCropReferencePopulator(db)
+      new RoastCropReferencePopulator(db),
+      new EntityUserReferencePopulator<Roast>(db)
     ];
   }
   protected references: IEntityRepositoryReferencePopulator<Roast>[];
