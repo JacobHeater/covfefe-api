@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { argv } from 'yargs';
 import { Server } from 'http';
 import 'module-alias/register';
@@ -6,7 +6,8 @@ import { initializeApiRouter } from './api';
 import { covfefeErrorHandler } from './api/middleware/response';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
-import { winstonStream } from '@common/logging/winston';
+import { winstonHttpStream } from '@common/logging/winston';
+import helmet from 'helmet';
 
 const app = express();
 const port = Number(process.env.PORT || argv.port || 8080);
@@ -20,13 +21,14 @@ export function startServerAsync(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
     try {
       // Third-party middleware
+      app.use(helmet());
       app.use(bodyParser.json());
       app.use(express.json());
-      app.set('x-powered-by', false);
-      app.use(morgan('combined', { stream: winstonStream }));
+      app.disable('x-powered-by');
+      app.use(morgan('combined', { stream: winstonHttpStream }));
       
       // Http handlers
-      app.get('/', (_, res) => res.redirect('/api/docs'));
+      app.get(['/', '/docs'], (_, res) => res.redirect('/api/docs'));
       app.use(apiPath, apiRouter);
       
       // Covfefe middleware

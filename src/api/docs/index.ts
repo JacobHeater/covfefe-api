@@ -11,7 +11,8 @@ export const docsRoute: IRoute = {
     const swaggerPath = path.join(appContext.baseDir, 'swagger.json');
     const swaggerDocument = JSON.parse(fs.readFileSync(swaggerPath).toString());
 
-    router.use('/', swagger.serve, swagger.setup({ swaggerDocument }));
+    router.use('/', swagger.serve);
+    router.get('/', swagger.setup(swaggerDocument));
 
     return ['/docs', router];
   }
