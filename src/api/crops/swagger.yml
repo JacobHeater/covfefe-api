@@ -1,6 +1,8 @@
 paths:
   /crops:
     get:
+      tags:
+        - crops
       summary: Returns a list of coffee crops.
       responses:
         '200':
@@ -12,6 +14,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/Crop'
     post:
+      tags:
+        - crops
       summary: Creates a coffee crop
       requestBody:
         required: true
@@ -28,6 +32,8 @@ paths:
                   $ref: '#/components/schemas/Crop'
   /crops/{cropId}:
     put:
+      tags:
+        - crops
       summary: Updates a coffee crop by id.
       parameters:
         - name: cropId
@@ -45,6 +51,8 @@ paths:
                 $ref: '#/components/schemas/Crop'
 
     get:
+      tags:
+        - crops
       summary: Gets a coffee crop by id
       parameters:
         - name: cropId
@@ -61,6 +69,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Crop'
     delete:
+      tags:
+        - crops
       summary: Deletes a coffee crop by id
       parameters:
         - name: cropId

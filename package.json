@@ -8,11 +8,13 @@
     "clean": "npx rimraf bin",
     "build": "npx tsc && node ./scripts/build/post-build.js",
     "rebuild": "npm run clean && npm run build",
-    "start": "npm run rebuild && node ."
+    "start": "npm run rebuild && node .",
+    "start:dev": "npm run rebuild && node scripts/start/dev/start.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "helmet": "^3.23.3",
     "http-status-codes": "^1.4.0",
     "module-alias": "^2.2.2",
     "mongodb": "^3.5.9",
@@ -34,6 +36,7 @@
     "@types/express": "^4.17.6",
     "@types/faker": "^4.1.12",
     "@types/fs-extra": "^9.0.1",
+    "@types/helmet": "0.0.47",
     "@types/jest": "^26.0.0",
     "@types/mongodb": "^3",
     "@types/morgan": "^1.9.1",

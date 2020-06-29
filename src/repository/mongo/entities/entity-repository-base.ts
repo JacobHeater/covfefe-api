@@ -39,7 +39,6 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     filter: TModel | { [key: string]: unknown } | FilterQuery<unknown>,
   ): Promise<TModel[]> {
     logger.debug(`Entering ${this.findAsync.name}()`);
-    logger.debug(`filter => ${JSON.stringify(filter)}`);
     const any = await this.collection
       .find(filter, { ...noMongoObjectId })
       .toArray();
@@ -57,15 +56,11 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     filter: TModel | { [key: string]: unknown },
   ): Promise<TModel> {
     logger.debug(`Entering ${this.findOneAsync.name}()`);
-    logger.debug(`filter => ${JSON.stringify(filter)}`);
     const one = await this.collection.findOne(filter, {
       ...noMongoObjectId,
     });
 
     if (!one) {
-      logger.debug(
-        `No entities were found using filter ${JSON.stringify(filter)}`,
-      );
       return null;
     }
 
@@ -110,7 +105,6 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
 
   async insertOneAsync(entity: TModel): Promise<string> {
     logger.debug(`Entering ${this.insertOneAsync.name}()`);
-    logger.debug(`entity => ${JSON.stringify(entity)}`);
     if (!entity) {
       logger.error(`Argument 'entity' must have a value to insert.`);
       throw new Error(`Argument 'entity' must have a value to insert.`);
@@ -169,7 +163,6 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     entity: TModel | { [key: string]: unknown },
   ): Promise<boolean> {
     logger.debug(`Entering ${this.updateOneAsync.name}(${id}, entity)`);
-    logger.debug(`entity => ${JSON.stringify(entity)}`);
     const result = await this.collection.updateOne(
       { id },
       {
@@ -200,7 +193,6 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     filter: { [key: string]: unknown } | TModel,
   ): Promise<boolean> {
     logger.debug(`Entering ${this.deleteManyAsync.name}(filter)`);
-    logger.debug(`filter => ${JSON.stringify(filter)}`);
 
     const result = await this.collection.deleteMany(filter);
 
