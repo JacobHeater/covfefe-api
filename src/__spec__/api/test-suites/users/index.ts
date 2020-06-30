@@ -7,6 +7,9 @@ import { User } from '@common/models/entities/user/user';
 import { Profile } from '@common/models/entities/user/profile/profile';
 import { random } from 'faker';
 import * as request from 'request-promise-native';
+import { AuthenticationResult } from '@app/models/authentication/authentication-result';
+import { decodeJwtAsync } from '@common/security/jwt';
+import { ApiEnvironment } from '@app/env';
 
 export class UsersApiTestSuite extends ApiTestSuite<User> {
   protected factory(): User {
@@ -47,19 +50,48 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
 
       const postResponse = await request.post(this.route(), {
         json: true,
-        body: user
-      })
+        body: user,
+      });
 
       expect(postResponse.id).toBeTruthy();
 
       const loginPromise = request.post(this.loginRoute(), {
         json: true,
         body: {
-          ...user
-        }
-      })
+          ...user,
+        },
+      });
 
       await expect(loginPromise).resolves.not.toThrow();
+    });
+
+    test(`It should return a valid JWT token as part of the response for a valid login`, async () => {
+      const user = new User();
+      user.username = 'boratFan';
+      user.password = 'password1234';
+
+      const postResponse = await request.post(this.route(), {
+        json: true,
+        body: user,
+      });
+
+      expect(postResponse.id).toBeTruthy();
+
+      const loginResponse: AuthenticationResult = await request.post(this.loginRoute(), {
+        json: true,
+        body: {
+          ...user,
+        },
+      });
+
+      expect(loginResponse.token).toBeTruthy();
+      expect(loginResponse.user).toBeTruthy();
+
+      const [isValidJwt, decoded] = await decodeJwtAsync(loginResponse.token, ApiEnvironment.jwtSecretKey);
+
+      expect(isValidJwt).toBe(true);
+      expect(decoded).toBeTruthy();
+      expect((decoded as User).username ).toEqual(user.username);
     });
 
     test(`It should return a Not Found status code when a user's username and or password are invalid`, async () => {
@@ -69,8 +101,8 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
 
       const postResponse = await request.post(this.route(), {
         json: true,
-        body: user
-      })
+        body: user,
+      });
 
       expect(postResponse.id).toBeTruthy();
 
@@ -78,31 +110,31 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
         json: true,
         body: {
           username: 'fakeusername',
-          password: 'badpass'
-        }
+          password: 'badpass',
+        },
       });
 
-      await expect(loginPromise).rejects.toThrow(/404/);
+      await expect(loginPromise).rejects.toThrow(/401/);
 
       loginPromise = request.post(this.loginRoute(), {
         json: true,
         body: {
           username: user.username,
-          password: 'badpass'
-        }
+          password: 'badpass',
+        },
       });
 
-      await expect(loginPromise).rejects.toThrow(/404/);
+      await expect(loginPromise).rejects.toThrow(/401/);
 
       loginPromise = request.post(this.loginRoute(), {
         json: true,
         body: {
           username: 'nouser',
-          password: user.password
-        }
+          password: user.password,
+        },
       });
 
-      await expect(loginPromise).rejects.toThrow(/404/);
+      await expect(loginPromise).rejects.toThrow(/401/);
     });
   }
 

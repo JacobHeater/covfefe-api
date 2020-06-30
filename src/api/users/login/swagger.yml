@@ -1,0 +1,20 @@
+components:
+  schemas:
+    AuthenticationResult:
+      properties:
+        token:
+          type: string
+          format: jwt
+
+paths:
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Authenticate a single user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationResult'

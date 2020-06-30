@@ -7,12 +7,17 @@ import { Db } from 'mongodb';
 import { IDisposable } from '@common/idisposable';
 
 export class RepositoryContainer<TModel extends Entity> implements IDisposable {
-  constructor(repositoryFactory: (new (database: Db) => EntityRepositoryBase<TModel>)) {
+  constructor(
+    repositoryFactory: new (database: Db) => EntityRepositoryBase<TModel>,
+    mongoConnStr: string = ApiEnvironment.mongoConnectionString,
+  ) {
     this._repositoryFactory = repositoryFactory;
-    this._mongo = new MongoConnection(ApiEnvironment.mongoConnectionString);
+    this._mongo = new MongoConnection(mongoConnStr);
   }
 
-  private _repositoryFactory: new (database: Db) => EntityRepositoryBase<TModel>;
+  private _repositoryFactory: new (database: Db) => EntityRepositoryBase<
+    TModel
+  >;
   private _mongo: MongoConnection;
   private _repoInstance: IMongoEntityRepository<TModel>;
 
