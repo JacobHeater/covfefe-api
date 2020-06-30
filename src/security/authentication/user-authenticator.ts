@@ -4,11 +4,9 @@ import { User } from '@common/models/entities/user/user';
 import { UserRepository } from '@app/repository/mongo/users/user-repository';
 import { using } from '@common/using';
 import { logger } from '@common/logging/winston';
-
-export interface AuthenticationResult {
-  authenticated: boolean;
-  user: User;
-}
+import { AuthenticationResult } from '@app/models/authentication/authentication-result';
+import { generateJwtAsync } from '@common/security/jwt';
+import { ApiEnvironment } from '@app/env';
 
 export class UserAuthenticator {
   constructor() {
@@ -34,21 +32,37 @@ export class UserAuthenticator {
 
         return {
           authenticated: matchUser !== null,
-          user: matchUser
+          user: matchUser,
         };
       },
     );
 
     if (err) {
-      logger.error(`There was an error while trying to authenticate user ${username}`);
+      logger.error(
+        `There was an error while trying to authenticate user ${username}`,
+      );
       logger.error(err.message);
 
       return {
-        authenticated: false,
+        token: null,
+        user: null,
+      };
+    }
+
+    const { user, authenticated } = result;
+
+    if (!authenticated) {
+      return {
+        token: null,
         user: null
       };
     }
 
-    return result;
+    const [, token] = await generateJwtAsync(result.user, ApiEnvironment.jwtSecretKey);
+
+    return {
+      token,
+      user
+    }
   }
 }

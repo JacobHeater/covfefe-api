@@ -73,14 +73,3 @@ paths:
       responses:
         '200':
           description: OK
-  /users/login:
-    post:
-      tags:
-        - users
-      summary: Authenticate a single user.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
