@@ -35,6 +35,9 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     return this.database.collection(this.collectionName);
   }
 
+  // virtual
+  protected processors: ((entity: TModel) => Promise<void>)[] = [];
+
   async findAsync(
     filter: TModel | { [key: string]: unknown } | FilterQuery<unknown>,
   ): Promise<TModel[]> {
@@ -46,7 +49,10 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     const entities = any.map((doc) => this.mapMongoDocumentToEntity(doc));
 
     for (const entity of entities) {
-      await this.processReferencesAsync(entity);
+      await Promise.all([
+        this.processReferencesAsync(entity),
+        this.executeDataProcessorsAsync(entity),
+      ]);
     }
 
     return entities;
@@ -66,7 +72,10 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
 
     const entity = this.mapMongoDocumentToEntity(one);
 
-    await this.processReferencesAsync(entity);
+    await Promise.all([
+      this.processReferencesAsync(entity),
+      this.executeDataProcessorsAsync(entity),
+    ]);
 
     return entity;
   }
@@ -80,7 +89,10 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     const entities = all.map((doc) => this.mapMongoDocumentToEntity(doc));
 
     for (const entity of entities) {
-      await this.processReferencesAsync(entity);
+      await Promise.all([
+        this.processReferencesAsync(entity),
+        this.executeDataProcessorsAsync(entity),
+      ]);
     }
 
     return entities;
@@ -93,7 +105,10 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
     if (found) {
       const entity = this.mapMongoDocumentToEntity(found);
 
-      await this.processReferencesAsync(entity);
+      await Promise.all([
+        this.processReferencesAsync(entity),
+        this.executeDataProcessorsAsync(entity),
+      ]);
 
       return entity;
     }
@@ -215,6 +230,12 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       return Promise.all(
         this.references.map((ref) => ref.populateReferenceAsync(entity)),
       );
+    }
+  }
+
+  private async executeDataProcessorsAsync(entity: TModel): Promise<void[]> {
+    if (Array.isArray(this.processors) && this.processors.length > 0) {
+      return Promise.all(this.processors.map((proc) => proc(entity)));
     }
   }
 }

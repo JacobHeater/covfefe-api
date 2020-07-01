@@ -8,8 +8,8 @@ import { Profile } from '@common/models/entities/user/profile/profile';
 import { random } from 'faker';
 import * as request from 'request-promise-native';
 import { AuthenticationResult } from '@app/models/authentication/authentication-result';
-import { decodeJwtAsync } from '@common/security/jwt';
-import { ApiEnvironment } from '@app/env';
+import { decodeJwtAsync, getJwtSecret } from '@common/security/jwt';
+import { Environment } from '@common/env';
 
 export class UsersApiTestSuite extends ApiTestSuite<User> {
   protected factory(): User {
@@ -28,7 +28,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
   protected modelName: string = User.name;
   protected assertPutEquals(model: User, response: User): void {
     expect(model.username).toEqual(response.username);
-    expect(model.password).toEqual(response.password);
+    expect(model.password).toEqual('');
   }
   protected updateForPut(model: User): User {
     model.username = random.word();
@@ -87,7 +87,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
       expect(loginResponse.token).toBeTruthy();
       expect(loginResponse.user).toBeTruthy();
 
-      const [isValidJwt, decoded] = await decodeJwtAsync(loginResponse.token, ApiEnvironment.jwtSecretKey);
+      const [isValidJwt, decoded] = await decodeJwtAsync(loginResponse.token, getJwtSecret());
 
       expect(isValidJwt).toBe(true);
       expect(decoded).toBeTruthy();

@@ -37,7 +37,7 @@ test(`It should link a ${User.name} resource to a ${Crop.name} resource`, async 
   await refPopulator.populateReferenceAsync(crop);
 
   expect(crop.user.username).toEqual(user.username);
-  expect(crop.user.password).toEqual(user.password);
+  expect(crop.user.password).toEqual('');
 });
 
 test(`It should link a ${User.name} resource to a ${Origin.name} resource`, async () => {
@@ -59,7 +59,7 @@ test(`It should link a ${User.name} resource to a ${Origin.name} resource`, asyn
   await refPopulator.populateReferenceAsync(origin);
 
   expect(origin.user.username).toEqual(user.username);
-  expect(origin.user.password).toEqual(user.password);
+  expect(origin.user.password).toEqual('');
 });
 
 test(`It should link a ${User.name} resource to a ${Roast.name} resource`, async () => {
@@ -81,5 +81,5 @@ test(`It should link a ${User.name} resource to a ${Roast.name} resource`, async
   await refPopulator.populateReferenceAsync(roast);
 
   expect(roast.user.username).toEqual(user.username);
-  expect(roast.user.password).toEqual(user.password);
+  expect(roast.user.password).toEqual('');
 });

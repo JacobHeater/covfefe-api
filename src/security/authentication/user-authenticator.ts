@@ -5,8 +5,8 @@ import { UserRepository } from '@app/repository/mongo/users/user-repository';
 import { using } from '@common/using';
 import { logger } from '@common/logging/winston';
 import { AuthenticationResult } from '@app/models/authentication/authentication-result';
-import { generateJwtAsync } from '@common/security/jwt';
-import { ApiEnvironment } from '@app/env';
+import { generateJwtAsync, getJwtSecret } from '@common/security/jwt';
+import { Environment } from '@common/env';
 
 export class UserAuthenticator {
   constructor() {
@@ -58,7 +58,7 @@ export class UserAuthenticator {
       };
     }
 
-    const [, token] = await generateJwtAsync(result.user, ApiEnvironment.jwtSecretKey);
+    const [, token] = await generateJwtAsync(result.user, getJwtSecret());
 
     return {
       token,

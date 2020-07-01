@@ -1,5 +1,6 @@
 import { startServerAsync } from '../../';
-import { LogLevel, setLogLevel } from '@common/logging/winston';
+import { setLogLevel } from '@common/logging/winston';
+import { LogLevel } from '@common/logging/winston/log-level';
 
 module.exports = async function () {
   process.env.MONGO_CONNECTION_STRING = 'mongodb://localhost:27017';
