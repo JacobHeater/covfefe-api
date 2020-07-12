@@ -4,6 +4,7 @@ import {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
+  UNAUTHORIZED,
 } from 'http-status-codes';
 import { RepositoryContainer } from '@app/repository/mongo/repository-container';
 import { HttpStatusError } from '@app/errors/http/http-status-error';
@@ -11,6 +12,7 @@ import { using } from '@common/using';
 import { ApiHttpHandler, ApiResponse, RepositoryFactory } from './types';
 import { Entity } from '@common/models/entities/entity';
 import { HttpContext } from '@app/http/http-context';
+import { UserNotPermittedError } from '@common/errors/security/permissions/user-not-permitted-error';
 
 export function createPutHandler<TEntity extends Entity>(
   repoFactory: RepositoryFactory<TEntity>,
@@ -59,6 +61,14 @@ export function createPutHandler<TEntity extends Entity>(
       return next(
         new HttpStatusError(`The requested resource was not found`, NOT_FOUND),
       );
+    }
+
+    if (error instanceof UserNotPermittedError) {
+      return next(new HttpStatusError(
+        `Unauthorized`,
+        UNAUTHORIZED,
+        error
+      ))
     }
 
     // Fallthrough - unknown error.

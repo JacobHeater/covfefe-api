@@ -8,9 +8,11 @@ import {
   OK,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
+  UNAUTHORIZED,
 } from 'http-status-codes';
 import { RepositoryContainer } from '@app/repository/mongo/repository-container';
 import { HttpContext } from '@app/http/http-context';
+import { UserNotPermittedError } from '@common/errors/security/permissions/user-not-permitted-error';
 
 export function createDeleteHandler<TEntity extends Entity>(
   repoFactory: RepositoryFactory<TEntity>,
@@ -50,6 +52,14 @@ export function createDeleteHandler<TEntity extends Entity>(
       return next(
         new HttpStatusError(`The resource was not found to delete`, NOT_FOUND),
       );
+    }
+
+    if (error instanceof UserNotPermittedError) {
+      return next(new HttpStatusError(
+        `Unauthorized`,
+        UNAUTHORIZED,
+        error
+      ))
     }
 
     // Fallthrough

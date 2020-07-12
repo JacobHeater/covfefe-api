@@ -4,8 +4,6 @@ import { Entity } from '@common/models/entities/entity';
 import shortid from 'shortid';
 import { serverResource } from '../helpers';
 import * as request from 'request-promise-native';
-import { User } from '@common/models/entities/user/user';
-import { Environment } from '@common/env';
 
 export enum SkipTestsInSuite {
   get,
@@ -55,6 +53,14 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       await expect(heartbeatPromise).resolves.not.toThrow();
     });
 
+    test(`It should return 401 when the caller does not provide a JWT on protected endpoint`, async () => {
+      const response = request.get(this.route(), {
+        json: true,
+      });
+
+      await expect(response).rejects.toThrow(/401/);
+    });
+
     test(`It should retrieve a list of ${this.modelName} using the GET api/${this.routeName} endpoint`, async () => {
       const promises: Promise<unknown>[] = [];
 
@@ -63,7 +69,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
         const response = request.post(this.route(), {
           json: true,
           body: entity,
-          headers: this.headers
+          headers: this.headers,
         });
         promises.push(response);
       }
@@ -85,7 +91,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const get = () =>
         request.get(this.route(shortid.generate()), {
           json: true,
-          headers: this.headers
+          headers: this.headers,
         });
 
       await expect(get).rejects.toThrow(/404/);
