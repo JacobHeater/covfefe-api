@@ -9,17 +9,18 @@ import {
   NOT_FOUND,
 } from 'http-status-codes';
 import { ApiHttpHandler, ApiResponse, RepositoryFactory } from './types';
+import { HttpContext } from '@app/http/http-context';
 
 export function createGetManyHandler<TEntity extends Entity>(
   repoFactory: RepositoryFactory<TEntity>,
 ): ApiHttpHandler {
   return async function getManyOfEntity(
-    _: Request,
+    req: Request,
     res: Response,
     next: NextFunction,
   ): ApiResponse {
     const [items, error] = await using(
-      new RepositoryContainer(repoFactory),
+      new RepositoryContainer(await HttpContext.createAsync(req), repoFactory),
       async (container) => {
         const repo = await container.create();
 
@@ -59,7 +60,7 @@ export function createGetOneHandler<TEntity extends Entity>(
     }
 
     const [item, error] = await using(
-      new RepositoryContainer(repoFactory),
+      new RepositoryContainer(await HttpContext.createAsync(req), repoFactory),
       async (container) => {
         const repo = await container.create();
 

@@ -2,21 +2,28 @@ import { UserRepository } from "@app/repository/mongo/users/user-repository";
 import { InMemoryMongoHelper } from "@app/__spec__/helpers/mongo";
 import { User } from "@common/models/entities/user/user";
 import { random } from "faker";
+import { WaiverReason } from "@common/security/permissions/ipermission-waiver";
 
 const dbHelper = new InMemoryMongoHelper();
 
 beforeAll(async () => {
-  await dbHelper.start();
+  await dbHelper.connect();
 });
 
 afterAll(async () => {
-  await dbHelper.cleanup();
-  await dbHelper.stop();
+  await dbHelper.dispose();
+  await dbHelper.disconnect();
 });
 
 it(`Should clean a username from the ${User.name} entity on read.`, async () => {
-  const db = dbHelper.db;
-  const userRepo = new UserRepository(db);
+  const userRepo = new UserRepository({
+    connection: dbHelper,
+    user: null,
+    waivePermissions: {
+      waive: true,
+      reason: WaiverReason.NoPermissions
+    }
+  });
 
   const user = new User();
   user.username = random.word();

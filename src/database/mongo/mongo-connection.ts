@@ -1,8 +1,8 @@
 import { MongoClient, MongoClientOptions, Db } from 'mongodb';
 import { Environment } from '@common/env';
-import { IDisposable } from '@common/idisposable';
+import { IMongoConnection } from './imongo-connection';
 
-export class MongoConnection implements IDisposable {
+export class MongoConnection implements IMongoConnection {
   constructor(
     url: string,
     databaseName?: string,

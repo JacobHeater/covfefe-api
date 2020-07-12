@@ -23,9 +23,14 @@ export function covfefeErrorHandler(
   next(error);
 }
 
-function getErrorMessageForResponse(error: Error): string {
+function getErrorMessageForResponse(
+  error: Error,
+): { [key: string]: any } | string {
   if (Environment.common.isDevelopment) {
-    return JSON.stringify(error);
+    return {
+      message: error.message,
+      stack: error.stack || '',
+    };
   }
 
   return error.message;

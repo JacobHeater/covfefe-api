@@ -3,14 +3,14 @@ import { Roast } from "@common/models/entities/roast/roast";
 import { Crop } from "@common/models/entities/crop/crop";
 import { CropRepository } from "../crop/crop-repository";
 import { Lazy } from "@common/lazy";
-import { Db } from "mongodb";
+import { DbRequestContext } from "@app/database/db-request-context";
 
 export class RoastCropReferencePopulator extends EntityRepositoryReferencePopulatorBase<
   Roast,
   Crop
 > {
-  constructor(db: Db) {
-    super(new Lazy<CropRepository>(() => new CropRepository(db)));
+  constructor(context: DbRequestContext) {
+    super(new Lazy<CropRepository>(() => new CropRepository(context)));
   }
 
   protected getReferenceId(entity: Roast): string {

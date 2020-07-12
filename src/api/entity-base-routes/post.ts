@@ -5,6 +5,7 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status-codes';
 import { RepositoryContainer } from '@app/repository/mongo/repository-container';
 import { Entity } from '@common/models/entities/entity';
 import { using } from '@common/using';
+import { HttpContext } from '@app/http/http-context';
 
 export function createPostHandler<TEntity extends Entity>(
   repoFactory: RepositoryFactory<TEntity>,
@@ -26,7 +27,7 @@ export function createPostHandler<TEntity extends Entity>(
     }
 
     const [inserted, error] = await using(
-      new RepositoryContainer(repoFactory),
+      new RepositoryContainer(await HttpContext.createAsync(req), repoFactory),
       async (container) => {
         const repo = await container.create();
         const id = await repo.insertOneAsync(req.body);

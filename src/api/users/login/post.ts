@@ -6,6 +6,8 @@ import {
 } from 'http-status-codes';
 import { HttpStatusError } from '@app/errors/http/http-status-error';
 import { UserAuthenticator } from '@app/security/authentication/user-authenticator';
+import { HttpContext } from '@app/http/http-context';
+import { WaiverReason } from '@common/security/permissions/ipermission-waiver';
 
 export async function postLogin(
   req: Request,
@@ -22,7 +24,10 @@ export async function postLogin(
   }
 
   const { username, password } = req.body;
-  const userAuthenticator = new UserAuthenticator();
+  const userAuthenticator = new UserAuthenticator(await HttpContext.createAsync(req, {
+    waive: true,
+    reason: WaiverReason.UserLogin
+  }));
   const authResult = await userAuthenticator.authenticateUsernameAndPasswordAsync(
     username,
     password,

@@ -1,13 +1,13 @@
-import { IRoute, IRouteComponent } from "../types";
-import express from "express";
-import { getCrops, getCrop } from "./get";
-import { putCrop } from "./put";
-import { deleteCrop } from "./delete";
-import { postCrop } from "./post";
+import { IRouteComponent } from '../types';
+import { getCrops, getCrop } from './get';
+import { putCrop } from './put';
+import { deleteCrop } from './delete';
+import { postCrop } from './post';
+import { RouteBase } from '../route-base';
 
-export const cropsRoute: IRoute = {
+export class CropsRoute extends RouteBase {
   exposeRoute(): IRouteComponent {
-    const router = express.Router();
+    const router = this.router;
 
     router.get('/', getCrops);
     router.get('/:id', getCrop);
@@ -17,4 +17,4 @@ export const cropsRoute: IRoute = {
 
     return ['/crops', router];
   }
-};
+}

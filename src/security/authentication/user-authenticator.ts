@@ -6,12 +6,12 @@ import { using } from '@common/using';
 import { logger } from '@common/logging/winston';
 import { AuthenticationResult } from '@app/models/authentication/authentication-result';
 import { generateJwtAsync, getJwtSecret } from '@common/security/jwt';
-import { Environment } from '@common/env';
+import { HttpContext } from '@app/http/http-context';
 
 export class UserAuthenticator {
-  constructor() {
+  constructor(httpContext: HttpContext) {
     this._userRepositoryContainer = new Lazy<RepositoryContainer<User>>(() => {
-      return new RepositoryContainer(UserRepository);
+      return new RepositoryContainer(httpContext, UserRepository);
     });
   }
 
@@ -25,10 +25,13 @@ export class UserAuthenticator {
       this._userRepositoryContainer.value,
       async (container) => {
         const repo = await container.create();
-        const matchUser = await repo.findOneAsync({
-          username,
-          password,
-        });
+        const matchUser = await repo.findOneAsync(
+          {
+            username,
+            password,
+          },
+          true,
+        );
 
         return {
           authenticated: matchUser !== null,
@@ -54,7 +57,7 @@ export class UserAuthenticator {
     if (!authenticated) {
       return {
         token: null,
-        user: null
+        user: null,
       };
     }
 
@@ -62,7 +65,7 @@ export class UserAuthenticator {
 
     return {
       token,
-      user
-    }
+      user,
+    };
   }
 }

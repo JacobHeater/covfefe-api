@@ -10,7 +10,6 @@
         "sourceMap": true,
         "outDir": "bin",
         "baseUrl": ".",
-        "experimentalDecorators": true,
         "paths": {
             "*": [
                 "node_modules/*",

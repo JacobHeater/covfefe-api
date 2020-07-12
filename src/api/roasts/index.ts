@@ -1,13 +1,13 @@
-import { IRoute, IRouteComponent } from "../types";
-import express from "express";
-import { getRoasts, getRoast } from "./get";
-import { putRoast } from "./put";
-import { postRoast } from "./post";
-import { deleteRoast } from "./delete";
+import { IRouteComponent } from '../types';
+import { getRoasts, getRoast } from './get';
+import { putRoast } from './put';
+import { postRoast } from './post';
+import { deleteRoast } from './delete';
+import { RouteBase } from '../route-base';
 
-export const roastsRoute: IRoute = {
+export class RoastsRoute extends RouteBase {
   exposeRoute(): IRouteComponent {
-    const router = express.Router();
+    const router = this.router;
 
     router.get('/', getRoasts);
     router.get('/:id', getRoast);
@@ -17,4 +17,4 @@ export const roastsRoute: IRoute = {
 
     return ['/roasts', router];
   }
-};
+}
