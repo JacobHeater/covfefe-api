@@ -1,6 +1,6 @@
 import { stopServerAsync } from '../../';
 import { MongoConnection } from '../../database/mongo/mongo-connection';
-import { ApiEnvironment } from '../../env';
+import { Environment } from '@common/env';
 
 class TestCleanupMongoConnection extends MongoConnection {
   async cleanup(): Promise<void> {
@@ -16,7 +16,7 @@ class TestCleanupMongoConnection extends MongoConnection {
 module.exports = async function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await stopServerAsync((global as any).server);
-  const mongoCleanupConnection = new TestCleanupMongoConnection(ApiEnvironment.mongoConnectionString);
+  const mongoCleanupConnection = new TestCleanupMongoConnection(Environment.db.mongoConnectionString);
 
   await mongoCleanupConnection.connect();
   await mongoCleanupConnection.cleanup();

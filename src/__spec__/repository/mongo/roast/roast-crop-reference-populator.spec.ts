@@ -8,21 +8,31 @@ import { Roast } from '@common/models/entities/roast/roast';
 import { InMemoryMongoHelper } from '@app/__spec__/helpers/mongo';
 import { User } from '@common/models/entities/user/user';
 import shortid from 'shortid';
+import { DbRequestContext } from '@app/database/db-request-context';
+import { WaiverReason } from '@common/security/permissions/ipermission-waiver';
 
 const dbHelper = new InMemoryMongoHelper();
+const context: DbRequestContext = {
+  connection: dbHelper,
+  user: null,
+  waivePermissions: {
+    waive: true,
+    reason: WaiverReason.NoPermissions
+  }
+};
 
 beforeAll(async () => {
-  await dbHelper.start();
+  await dbHelper.connect();
 });
 
 afterAll(async () => {
-  await dbHelper.cleanup();
-  await dbHelper.stop();
+  await dbHelper.dispose();
+  await dbHelper.disconnect();
 });
 
 test(`It should successfully link a reference to an ${Origin.name} entity that is in the database and populate it`, async () => {
-  const originRepo = new OriginRepository(dbHelper.db);
-  const cropRepo = new CropRepository(dbHelper.db);
+  const originRepo = new OriginRepository(context);
+  const cropRepo = new CropRepository(context);
 
   const origin = new Origin();
   origin.user = new User();
@@ -67,7 +77,7 @@ test(`It should successfully link a reference to an ${Origin.name} entity that i
   inMemoryRoast.crop = new Crop();
   inMemoryRoast.crop.id = cropId;
 
-  const refPopulator = new RoastCropReferencePopulator(dbHelper.db);
+  const refPopulator = new RoastCropReferencePopulator(context);
 
   await refPopulator.populateReferenceAsync(inMemoryRoast);
 

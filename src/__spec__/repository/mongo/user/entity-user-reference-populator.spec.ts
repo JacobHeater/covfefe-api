@@ -6,21 +6,30 @@ import { random } from "faker";
 import { EntityUserReferencePopulator } from "@app/repository/mongo/users/entity-user-reference-populator";
 import { Origin } from "@common/models/entities/origin/origin";
 import { Roast } from "@common/models/entities/roast/roast";
+import { DbRequestContext } from "@app/database/db-request-context";
+import { WaiverReason } from "@common/security/permissions/ipermission-waiver";
 
 const dbHelper = new InMemoryMongoHelper();
+const context: DbRequestContext = {
+  connection: dbHelper,
+  user: null,
+  waivePermissions: {
+    waive: true,
+    reason: WaiverReason.NoPermissions
+  }
+};
 
 beforeAll(async () => {
-  await dbHelper.start();
+  await dbHelper.connect();
 });
 
 afterAll(async () => {
-  await dbHelper.cleanup();
-  await dbHelper.stop();
+  await dbHelper.dispose();
+  await dbHelper.disconnect();
 });
 
 test(`It should link a ${User.name} resource to a ${Crop.name} resource`, async () => {
-  const db = dbHelper.db;
-  const userRepo = new UserRepository(db);
+  const userRepo = new UserRepository(context);
 
   const user = new User();
   user.username = random.word();
@@ -32,17 +41,16 @@ test(`It should link a ${User.name} resource to a ${Crop.name} resource`, async 
   crop.user = new User();
   crop.user.id = userId;
 
-  const refPopulator = new EntityUserReferencePopulator<Crop>(db);
+  const refPopulator = new EntityUserReferencePopulator<Crop>(context);
   
   await refPopulator.populateReferenceAsync(crop);
 
   expect(crop.user.username).toEqual(user.username);
-  expect(crop.user.password).toEqual(user.password);
+  expect(crop.user.password).toEqual('');
 });
 
 test(`It should link a ${User.name} resource to a ${Origin.name} resource`, async () => {
-  const db = dbHelper.db;
-  const userRepo = new UserRepository(db);
+  const userRepo = new UserRepository(context);
 
   const user = new User();
   user.username = random.word();
@@ -54,17 +62,16 @@ test(`It should link a ${User.name} resource to a ${Origin.name} resource`, asyn
   origin.user = new User();
   origin.user.id = userId;
 
-  const refPopulator = new EntityUserReferencePopulator<Origin>(db);
+  const refPopulator = new EntityUserReferencePopulator<Origin>(context);
   
   await refPopulator.populateReferenceAsync(origin);
 
   expect(origin.user.username).toEqual(user.username);
-  expect(origin.user.password).toEqual(user.password);
+  expect(origin.user.password).toEqual('');
 });
 
 test(`It should link a ${User.name} resource to a ${Roast.name} resource`, async () => {
-  const db = dbHelper.db;
-  const userRepo = new UserRepository(db);
+  const userRepo = new UserRepository(context);
 
   const user = new User();
   user.username = random.word();
@@ -76,10 +83,10 @@ test(`It should link a ${User.name} resource to a ${Roast.name} resource`, async
   roast.user = new User();
   roast.user.id = userId;
 
-  const refPopulator = new EntityUserReferencePopulator<Roast>(db);
+  const refPopulator = new EntityUserReferencePopulator<Roast>(context);
   
   await refPopulator.populateReferenceAsync(roast);
 
   expect(roast.user.username).toEqual(user.username);
-  expect(roast.user.password).toEqual(user.password);
+  expect(roast.user.password).toEqual('');
 });

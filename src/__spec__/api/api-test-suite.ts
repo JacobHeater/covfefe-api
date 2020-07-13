@@ -4,12 +4,23 @@ import { Entity } from '@common/models/entities/entity';
 import shortid from 'shortid';
 import { serverResource } from '../helpers';
 import * as request from 'request-promise-native';
+import { factory } from '@common/factory';
+import {
+  Permission,
+  PermissionAction,
+  PermissionTarget,
+} from '@common/security/permissions/permission';
+import { RepositoryContainer } from '@app/repository/mongo/repository-container';
+import { RoleRepository } from '@app/repository/mongo/role/role-repository';
+import { WaiverReason } from '@common/security/permissions/ipermission-waiver';
+import { using } from '@common/using';
+import { Role } from '@common/models/entities/roles/role';
 
 export enum SkipTestsInSuite {
-  Get,
-  Post,
-  Put,
-  Delete,
+  get,
+  post,
+  put,
+  delete,
 }
 
 export abstract class ApiTestSuite<TEntity extends Entity> {
@@ -21,10 +32,10 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
   protected skipped: SkipTestsInSuite[] = [];
 
   public init(): void {
-    !this.skipped.includes(SkipTestsInSuite.Get) && this.initGet();
-    !this.skipped.includes(SkipTestsInSuite.Post) && this.initPost();
-    !this.skipped.includes(SkipTestsInSuite.Put) && this.initPut();
-    !this.skipped.includes(SkipTestsInSuite.Delete) && this.initDelete();
+    !this.skipped.includes(SkipTestsInSuite.get) && this.initGet();
+    !this.skipped.includes(SkipTestsInSuite.post) && this.initPost();
+    !this.skipped.includes(SkipTestsInSuite.put) && this.initPut();
+    !this.skipped.includes(SkipTestsInSuite.delete) && this.initDelete();
     this.registerAdditionalTests();
   }
 
@@ -40,7 +51,62 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
     return serverResource(`api/${this.routeName}`);
   }
 
+  protected get headers(): { [key: string]: string } {
+    return {
+      Authorization: `Bearer ${process.env.API_TOKEN}`,
+    };
+  }
+
   private initGet(): void {
+    test(`It should receive a 200 from the route /heartbeat request`, async () => {
+      const heartbeatPromise = request.get(`${this.route()}/heartbeat`);
+
+      await expect(heartbeatPromise).resolves.not.toThrow();
+    });
+
+    test(`It should return 401 when the caller does not provide a JWT on protected endpoint`, async () => {
+      const [role] = await using(
+        new RepositoryContainer(
+          {
+            user: null,
+            waivePermissions: {
+              waive: true,
+              reason: WaiverReason.NoPermissions,
+            },
+          },
+          RoleRepository,
+        ),
+        async (container) => {
+          const repo = await container.create();
+
+          return await repo.findOneAsync({ name: Role.userRoleName });
+        },
+      );
+
+      const entity = this.factory();
+      entity.permitted = [
+        factory(Permission, {
+          actions: [PermissionAction.read],
+          target: PermissionTarget.role,
+          targetId: role.id,
+        }),
+      ];
+
+      let response = request.post(this.route(), {
+        json: true,
+        body: entity,
+        headers: this.headers,
+      });
+
+      await expect(response).resolves.not.toThrow();
+
+      response = request.get(this.route(), {
+        json: true,
+      });
+
+      await expect(response).rejects.toThrow(/401/);
+    });
+
     test(`It should retrieve a list of ${this.modelName} using the GET api/${this.routeName} endpoint`, async () => {
       const promises: Promise<unknown>[] = [];
 
@@ -49,6 +115,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
         const response = request.post(this.route(), {
           json: true,
           body: entity,
+          headers: this.headers,
         });
         promises.push(response);
       }
@@ -59,6 +126,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
 
       const response = await request.get(this.route(), {
         json: true,
+        headers: this.headers,
       });
 
       expect(Array.isArray(response)).toBe(true);
@@ -69,6 +137,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const get = () =>
         request.get(this.route(shortid.generate()), {
           json: true,
+          headers: this.headers,
         });
 
       await expect(get).rejects.toThrow(/404/);
@@ -82,6 +151,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const response = await request.post(this.route(), {
         body: model,
         json: true,
+        headers: this.headers,
       });
 
       expect(response.id).toBeDefined();
@@ -92,6 +162,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
         request.post(this.route(), {
           body: {},
           json: true,
+          headers: this.headers,
         });
 
       await expect(post).rejects.toThrow(/400/);
@@ -105,6 +176,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const response = await request.post(this.route(), {
         body: model,
         json: true,
+        headers: this.headers,
       });
 
       expect(response.id).toBeDefined();
@@ -116,12 +188,14 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const putResponse = await request.put(this.route(response.id), {
         json: true,
         body: putModel,
+        headers: this.headers,
       });
 
       expect(putResponse).toContain('OK');
 
       const getResponse = await request.get(this.route(response.id), {
         json: true,
+        headers: this.headers,
       });
 
       expect(getResponse.id).toBe(response.id);
@@ -133,6 +207,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
         request.put(this.route(shortid.generate()), {
           json: true,
           body: this.updateForPut(this.factory()),
+          headers: this.headers,
         });
 
       await expect(put).rejects.toThrow(/404/);
@@ -144,6 +219,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const response = await request.post(this.route(), {
         json: true,
         body: model,
+        headers: this.headers,
       });
 
       expect(response.id).toBeDefined();
@@ -152,6 +228,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
         request.put(this.route(response.id), {
           json: true,
           body: {},
+          headers: this.headers,
         });
 
       await expect(put).rejects.toThrow(/500/);
@@ -165,6 +242,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const response = await request.post(this.route(), {
         json: true,
         body: model,
+        headers: this.headers,
       });
 
       expect(response.id).toBeDefined();
@@ -172,6 +250,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const _delete = (() =>
         request.delete(this.route(response.id), {
           json: true,
+          headers: this.headers,
         }))();
 
       await expect(_delete).resolves.toContain('OK');
@@ -181,6 +260,7 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
       const _delete = () =>
         request.delete(this.route(shortid.generate()), {
           json: true,
+          headers: this.headers,
         });
 
       await expect(_delete).rejects.toThrow(/404/);

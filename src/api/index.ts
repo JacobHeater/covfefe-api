@@ -1,10 +1,14 @@
-import express from 'express';
-import { roastsRoute } from './roasts';
-import { originsRoute } from './origins';
-import { docsRoute } from './docs';
-import { cropsRoute } from './crops';
+import express, { Response, Request } from 'express';
+import { RoastsRoute } from './roasts';
+import { OriginsRoute } from './origins';
+import { DocsRoute } from './docs';
+import { CropsRoute } from './crops';
 import { IRouteComponent } from './types';
-import { usersRoute } from './users';
+import { UsersRoute } from './users';
+import { RolesRoute } from './roles';
+import { OK } from 'http-status-codes';
+
+export const heartbeatRoute = '/heartbeat';
 
 /**
  * Initializes the /api Router and compiles
@@ -14,11 +18,12 @@ import { usersRoute } from './users';
 export function initializeApiRouter(): IRouteComponent {
   const apiRouter = express.Router();
   const routes = [
-    roastsRoute,
-    originsRoute,
-    docsRoute,
-    cropsRoute,
-    usersRoute,
+    new RoastsRoute(),
+    new OriginsRoute(),
+    new DocsRoute(),
+    new CropsRoute(),
+    new UsersRoute(),
+    new RolesRoute(),
   ].map((r) => r.exposeRoute());
 
   for (const route of routes) {
@@ -27,5 +32,11 @@ export function initializeApiRouter(): IRouteComponent {
     apiRouter.use(path, router);
   }
 
+  apiRouter.get(heartbeatRoute, answerHeartbeat);
+
   return ['/api', apiRouter];
+}
+
+function answerHeartbeat(_: Request, res: Response) {
+  return res.sendStatus(OK);
 }

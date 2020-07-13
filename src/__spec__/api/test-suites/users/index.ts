@@ -8,8 +8,7 @@ import { Profile } from '@common/models/entities/user/profile/profile';
 import { random } from 'faker';
 import * as request from 'request-promise-native';
 import { AuthenticationResult } from '@app/models/authentication/authentication-result';
-import { decodeJwtAsync } from '@common/security/jwt';
-import { ApiEnvironment } from '@app/env';
+import { decodeJwtAsync, getJwtSecret } from '@common/security/jwt';
 
 export class UsersApiTestSuite extends ApiTestSuite<User> {
   protected factory(): User {
@@ -28,7 +27,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
   protected modelName: string = User.name;
   protected assertPutEquals(model: User, response: User): void {
     expect(model.username).toEqual(response.username);
-    expect(model.password).toEqual(response.password);
+    expect(model.password).toEqual('');
   }
   protected updateForPut(model: User): User {
     model.username = random.word();
@@ -51,6 +50,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
       const postResponse = await request.post(this.route(), {
         json: true,
         body: user,
+        headers: this.headers,
       });
 
       expect(postResponse.id).toBeTruthy();
@@ -60,6 +60,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
         body: {
           ...user,
         },
+        headers: this.headers,
       });
 
       await expect(loginPromise).resolves.not.toThrow();
@@ -73,25 +74,33 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
       const postResponse = await request.post(this.route(), {
         json: true,
         body: user,
+        headers: this.headers,
       });
 
       expect(postResponse.id).toBeTruthy();
 
-      const loginResponse: AuthenticationResult = await request.post(this.loginRoute(), {
-        json: true,
-        body: {
-          ...user,
+      const loginResponse: AuthenticationResult = await request.post(
+        this.loginRoute(),
+        {
+          json: true,
+          body: {
+            ...user,
+          },
+          headers: this.headers,
         },
-      });
+      );
 
       expect(loginResponse.token).toBeTruthy();
       expect(loginResponse.user).toBeTruthy();
 
-      const [isValidJwt, decoded] = await decodeJwtAsync(loginResponse.token, ApiEnvironment.jwtSecretKey);
+      const [isValidJwt, decoded] = await decodeJwtAsync(
+        loginResponse.token,
+        getJwtSecret(),
+      );
 
       expect(isValidJwt).toBe(true);
       expect(decoded).toBeTruthy();
-      expect((decoded as User).username ).toEqual(user.username);
+      expect((decoded as User).username).toEqual(user.username);
     });
 
     test(`It should return a Not Found status code when a user's username and or password are invalid`, async () => {
@@ -102,6 +111,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
       const postResponse = await request.post(this.route(), {
         json: true,
         body: user,
+        headers: this.headers,
       });
 
       expect(postResponse.id).toBeTruthy();
@@ -112,6 +122,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
           username: 'fakeusername',
           password: 'badpass',
         },
+        headers: this.headers,
       });
 
       await expect(loginPromise).rejects.toThrow(/401/);
@@ -122,6 +133,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
           username: user.username,
           password: 'badpass',
         },
+        headers: this.headers,
       });
 
       await expect(loginPromise).rejects.toThrow(/401/);
@@ -132,6 +144,7 @@ export class UsersApiTestSuite extends ApiTestSuite<User> {
           username: 'nouser',
           password: user.password,
         },
+        headers: this.headers,
       });
 
       await expect(loginPromise).rejects.toThrow(/401/);

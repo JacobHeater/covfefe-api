@@ -1,19 +1,27 @@
 import { DummyRepository } from '@app/__spec__/helpers/dummy/dummy-repository';
 import { InMemoryMongoHelper } from '@app/__spec__/helpers/mongo';
 import { DummyModel } from '../../../helpers/dummy/models/dummy-model';
+import { WaiverReason } from '@common/security/permissions/ipermission-waiver';
 
 const dbHelper = new InMemoryMongoHelper();
 let dummyRepo: DummyRepository;
 let record: DummyModel;
 
 beforeAll(async () => {
-  await dbHelper.start();
-  dummyRepo = new DummyRepository(dbHelper.db);
+  await dbHelper.connect();
+  dummyRepo = new DummyRepository({
+    connection: dbHelper,
+    user: null,
+    waivePermissions: {
+      waive: true,
+      reason: WaiverReason.NoPermissions
+    }
+  });
 });
 
 afterAll(async () => {
-  await dbHelper.cleanup();
-  await dbHelper.stop();
+  await dbHelper.dispose();
+  await dbHelper.disconnect();
 });
 
 test('It should successfully insert a single record into the collection', async () => {

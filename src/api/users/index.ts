@@ -1,14 +1,14 @@
-import * as express from 'express';
-import { IRoute, IRouteComponent } from '../types';
+import { IRouteComponent } from '../types';
 import { postUser } from './post';
 import { putUser } from './put';
 import { getUser, getUsers } from './get';
 import { deleteUser } from './delete';
 import { loginRoute } from './login';
+import { RouteBase } from '../route-base';
 
-export const usersRoute: IRoute = {
+export class UsersRoute extends RouteBase {
   exposeRoute(): IRouteComponent {
-    const router = express.Router();
+    const router = this.router;
 
     router.get('/', getUsers);
     router.get('/:id', getUser);
@@ -22,4 +22,4 @@ export const usersRoute: IRoute = {
 
     return ['/users', router];
   }
-};
+}

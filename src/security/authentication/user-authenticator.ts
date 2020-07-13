@@ -5,13 +5,13 @@ import { UserRepository } from '@app/repository/mongo/users/user-repository';
 import { using } from '@common/using';
 import { logger } from '@common/logging/winston';
 import { AuthenticationResult } from '@app/models/authentication/authentication-result';
-import { generateJwtAsync } from '@common/security/jwt';
-import { ApiEnvironment } from '@app/env';
+import { generateJwtAsync, getJwtSecret } from '@common/security/jwt';
+import { HttpContext } from '@app/http/http-context';
 
 export class UserAuthenticator {
-  constructor() {
+  constructor(httpContext: HttpContext) {
     this._userRepositoryContainer = new Lazy<RepositoryContainer<User>>(() => {
-      return new RepositoryContainer(UserRepository);
+      return new RepositoryContainer(httpContext, UserRepository);
     });
   }
 
@@ -25,10 +25,13 @@ export class UserAuthenticator {
       this._userRepositoryContainer.value,
       async (container) => {
         const repo = await container.create();
-        const matchUser = await repo.findOneAsync({
-          username,
-          password,
-        });
+        const matchUser = await repo.findOneAsync(
+          {
+            username,
+            password,
+          },
+          true,
+        );
 
         return {
           authenticated: matchUser !== null,
@@ -54,15 +57,15 @@ export class UserAuthenticator {
     if (!authenticated) {
       return {
         token: null,
-        user: null
+        user: null,
       };
     }
 
-    const [, token] = await generateJwtAsync(result.user, ApiEnvironment.jwtSecretKey);
+    const [, token] = await generateJwtAsync(result.user, getJwtSecret());
 
     return {
       token,
-      user
-    }
+      user,
+    };
   }
 }

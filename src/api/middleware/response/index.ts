@@ -2,7 +2,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { INTERNAL_SERVER_ERROR } from 'http-status-codes';
-import { ApiEnvironment } from '@app/env';
+import { Environment } from '@common/env';
 import { HttpStatusError } from '@app/errors/http/http-status-error';
 
 export function covfefeErrorHandler(
@@ -23,9 +23,14 @@ export function covfefeErrorHandler(
   next(error);
 }
 
-function getErrorMessageForResponse(error: Error): string {
-  if (ApiEnvironment.isDevelopment) {
-    return JSON.stringify(error);
+function getErrorMessageForResponse(
+  error: Error,
+): { [key: string]: any } | string {
+  if (Environment.common.isDevelopment) {
+    return {
+      message: error.message,
+      stack: error.stack || '',
+    };
   }
 
   return error.message;

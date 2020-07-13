@@ -1,15 +1,15 @@
 import { MongoClient, MongoClientOptions, Db } from 'mongodb';
-import { ApiEnvironment } from '@app/env';
-import { IDisposable } from '@common/idisposable';
+import { Environment } from '@common/env';
+import { IMongoConnection } from './imongo-connection';
 
-export class MongoConnection implements IDisposable {
+export class MongoConnection implements IMongoConnection {
   constructor(
     url: string,
     databaseName?: string,
     options?: MongoClientOptions,
   ) {
     this.url = url;
-    this.databaseName = databaseName || ApiEnvironment.mongoDatabaseName || 'covfefe';
+    this.databaseName = databaseName || Environment.db.mongoDatabaseName || 'covfefe';
     options = Object.assign<MongoClientOptions, MongoClientOptions>(options || {}, {
       useUnifiedTopology: true
     });

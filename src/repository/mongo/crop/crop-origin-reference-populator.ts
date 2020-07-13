@@ -3,14 +3,14 @@ import { Origin } from '@common/models/entities/origin/origin';
 import { Crop } from '@common/models/entities/crop/crop';
 import { Lazy } from '@common/lazy';
 import { OriginRepository } from '../origin/origin-repository';
-import { Db } from 'mongodb';
+import { DbRequestContext } from '@app/database/db-request-context';
 
 export class CropOriginReferencePopulator extends EntityRepositoryReferencePopulatorBase<
   Crop,
   Origin
 > {
-  constructor(db: Db) {
-    super(new Lazy<OriginRepository>(() => new OriginRepository(db)));
+  constructor(context: DbRequestContext) {
+    super(new Lazy<OriginRepository>(() => new OriginRepository(context)));
   }
 
   protected getReferenceId(entity: Crop): string {

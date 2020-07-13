@@ -2,12 +2,20 @@ import { RepositoryContainer } from "@app/repository/mongo/repository-container"
 import { DummyRepository } from "../../helpers/dummy/dummy-repository";
 import { DummyModel } from "../../helpers/dummy/models/dummy-model";
 import { IMongoEntityRepository } from "@app/repository/mongo/entities/imongo-entity-repository";
+import { HttpContext } from "@app/http/http-context";
+import { WaiverReason } from "@common/security/permissions/ipermission-waiver";
 
 let container: RepositoryContainer<DummyModel>;
 let repo: IMongoEntityRepository<DummyModel>;
 
 beforeAll(async () => {
-  container = new RepositoryContainer(DummyRepository);
+  container = new RepositoryContainer({
+    user: null,
+    waivePermissions: {
+      waive: true,
+      reason: WaiverReason.NoPermissions
+    }
+  }, DummyRepository);
   repo = await container.create();
 });
 afterAll(async () => await container.destroy());
