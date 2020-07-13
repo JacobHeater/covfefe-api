@@ -31,11 +31,7 @@ export function createGetManyHandler<TEntity extends Entity>(
     );
 
     if (error instanceof UserNotPermittedError) {
-      return next(new HttpStatusError(
-        `Unauthorized`,
-        UNAUTHORIZED,
-        error
-      ))
+      return next(new HttpStatusError(`Unauthorized`, UNAUTHORIZED, error));
     }
 
     if (error) {
@@ -83,11 +79,7 @@ export function createGetOneHandler<TEntity extends Entity>(
     }
 
     if (error instanceof UserNotPermittedError) {
-      return next(new HttpStatusError(
-        `Unauthorized`,
-        UNAUTHORIZED,
-        error
-      ))
+      return next(new HttpStatusError(`Unauthorized`, UNAUTHORIZED, error));
     }
 
     return res.send(item);

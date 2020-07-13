@@ -4,6 +4,17 @@ import { Entity } from '@common/models/entities/entity';
 import shortid from 'shortid';
 import { serverResource } from '../helpers';
 import * as request from 'request-promise-native';
+import { factory } from '@common/factory';
+import {
+  Permission,
+  PermissionAction,
+  PermissionTarget,
+} from '@common/security/permissions/permission';
+import { RepositoryContainer } from '@app/repository/mongo/repository-container';
+import { RoleRepository } from '@app/repository/mongo/role/role-repository';
+import { WaiverReason } from '@common/security/permissions/ipermission-waiver';
+import { using } from '@common/using';
+import { Role } from '@common/models/entities/roles/role';
 
 export enum SkipTestsInSuite {
   get,
@@ -54,7 +65,42 @@ export abstract class ApiTestSuite<TEntity extends Entity> {
     });
 
     test(`It should return 401 when the caller does not provide a JWT on protected endpoint`, async () => {
-      const response = request.get(this.route(), {
+      const [role] = await using(
+        new RepositoryContainer(
+          {
+            user: null,
+            waivePermissions: {
+              waive: true,
+              reason: WaiverReason.NoPermissions,
+            },
+          },
+          RoleRepository,
+        ),
+        async (container) => {
+          const repo = await container.create();
+
+          return await repo.findOneAsync({ name: Role.userRoleName });
+        },
+      );
+
+      const entity = this.factory();
+      entity.permitted = [
+        factory(Permission, {
+          actions: [PermissionAction.read],
+          target: PermissionTarget.role,
+          targetId: role.id,
+        }),
+      ];
+
+      let response = request.post(this.route(), {
+        json: true,
+        body: entity,
+        headers: this.headers,
+      });
+
+      await expect(response).resolves.not.toThrow();
+
+      response = request.get(this.route(), {
         json: true,
       });
 

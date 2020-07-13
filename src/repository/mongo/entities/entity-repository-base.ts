@@ -18,6 +18,7 @@ import { CollectionPermission } from '@common/models/entities/permissions/collec
 import { PermissionAction } from '@common/security/permissions/permission';
 import { IPermissionWaiver } from '@common/security/permissions/ipermission-waiver';
 import { EmptyUpdateEntityError } from '@app/errors/repository/empty-update-entity-error';
+import { UserNotPermittedError } from '@common/errors/security/permissions/user-not-permitted-error';
 
 const noMongoObjectId = {
   projection: {
@@ -77,8 +78,7 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
   ): Promise<TModel[]> {
     logger.debug(`Entering ${this.findAsync.name}()`);
 
-    if (!(await this.validateCollectionPermissionsAsync(PermissionAction.read)))
-      return null;
+    await this.validateCollectionPermissionsAsync(PermissionAction.read);
 
     const any = await this.collection
       .find(filter, { ...noMongoObjectId })
@@ -104,6 +104,8 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
   ): Promise<TModel> {
     logger.debug(`Entering ${this.findOneAsync.name}()`);
 
+    await this.validateCollectionPermissionsAsync(PermissionAction.read);
+
     const one = await this.collection.findOne(filter, {
       ...noMongoObjectId,
     });
@@ -128,6 +130,9 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
 
   async findAllAsync(): Promise<TModel[]> {
     logger.debug(`Entering ${this.findAllAsync.name}()`);
+
+    await this.validateCollectionPermissionsAsync(PermissionAction.read);
+
     const all = await this.collection
       .find({}, { ...noMongoObjectId })
       .toArray();
@@ -148,6 +153,9 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
 
   async findOneByIdAsync(id: string): Promise<TModel> {
     logger.debug(`Entering ${this.findOneByIdAsync.name}(id: ${id})`);
+
+    await this.validateCollectionPermissionsAsync(PermissionAction.read);
+
     const found = await this.collection.findOne({ id }, { ...noMongoObjectId });
 
     if (found) {
@@ -175,10 +183,7 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       throw new Error(`Argument 'entity' must have a value to insert.`);
     }
 
-    if (
-      !(await this.validateCollectionPermissionsAsync(PermissionAction.create))
-    )
-      return null;
+    await this.validateCollectionPermissionsAsync(PermissionAction.create);
 
     entity.id = shortid.generate();
 
@@ -206,10 +211,7 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       throw new Error(`Argument 'entities' must be an array to insert many.`);
     }
 
-    if (
-      !(await this.validateCollectionPermissionsAsync(PermissionAction.create))
-    )
-      return null;
+    await this.validateCollectionPermissionsAsync(PermissionAction.create);
 
     entities.forEach((e) => (e.id = shortid.generate()));
 
@@ -229,13 +231,10 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
   async deleteOneAsync(id: string): Promise<boolean> {
     logger.debug(`Entering ${this.deleteOneAsync.name}(${id})`);
 
-    if (
-      !(await this.validateCollectionPermissionsAsync(
-        PermissionAction.delete,
-        PermissionAction.read,
-      ))
-    )
-      return false;
+    await this.validateCollectionPermissionsAsync(
+      PermissionAction.delete,
+      PermissionAction.read,
+    );
 
     const findResult = await this.findOneByIdAsync(id);
 
@@ -256,13 +255,10 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
   ): Promise<boolean> {
     logger.debug(`Entering ${this.updateOneAsync.name}(${id}, entity)`);
 
-    if (
-      !this.validateCollectionPermissionsAsync(
-        PermissionAction.read,
-        PermissionAction.update,
-      )
-    )
-      return false;
+    await this.validateCollectionPermissionsAsync(
+      PermissionAction.read,
+      PermissionAction.update,
+    );
 
     const findResult = await this.findOneByIdAsync(id);
 
@@ -294,13 +290,10 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
   ): Promise<boolean> {
     logger.debug(`Entering ${this.updateManyAsync.name}()`);
 
-    if (
-      !this.validateCollectionPermissionsAsync(
-        PermissionAction.update,
-        PermissionAction.read,
-      )
-    )
-      return false;
+    await this.validateCollectionPermissionsAsync(
+      PermissionAction.update,
+      PermissionAction.read,
+    );
 
     const findResults = await this.findAsync(filter);
 
@@ -318,8 +311,7 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
   ): Promise<boolean> {
     logger.debug(`Entering ${this.deleteManyAsync.name}(filter)`);
 
-    if (!this.validateCollectionPermissionsAsync(PermissionAction.delete))
-      return false;
+    await this.validateCollectionPermissionsAsync(PermissionAction.delete);
 
     const findResults = await this.findAsync(filter);
 
@@ -406,7 +398,9 @@ export abstract class EntityRepositoryBase<TModel extends Entity>
       ),
     );
 
-    return isPermitted;
+    if (!isPermitted) throw new UserNotPermittedError();
+
+    return true;
   }
 
   private validateEntityPermissions(
