@@ -12,7 +12,7 @@ module.exports = async function () {
   process.env.MONGO_ADMIN_PASSWORD = 'p@$$W0rd1234';
   process.env.NODE_ENV = 'development';
 
-  setLogLevel(LogLevel.error);
+  setLogLevel(LogLevel.silent);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).server = await startServerAsync(5555);
